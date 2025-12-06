@@ -1,0 +1,12 @@
+[application]
+name = "myapp-ui"
+default_platform = "web"
+out_dir = "/target/dx/myapp-ui/release/web/public"
+asset_dir = "assets"
+
+[web.app]
+title = "Tauri + Dioxus App"
+
+[web.watcher]
+reload_html = true
+watch_path = ["src", "assets"]
