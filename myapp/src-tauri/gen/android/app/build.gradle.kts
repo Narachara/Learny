@@ -18,6 +18,7 @@ android {
     namespace = "com.myapp.app"
     defaultConfig {
         manifestPlaceholders["usesCleartextTraffic"] = "false"
+        manifestPlaceholders["tauriActivity"] = "com.myapp.app.CustomMainActivity"
         applicationId = "com.myapp.app"
         minSdk = 24
         targetSdk = 36

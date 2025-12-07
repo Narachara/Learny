@@ -11,3 +11,9 @@ pub(crate) async fn ping<R: Runtime>(
 ) -> Result<PingResponse> {
     app.bliet().ping(payload)
 }
+
+
+#[command]
+pub(crate) async fn pick_image<R: Runtime>(app: AppHandle<R>) -> Result<String> {
+    app.bliet().pick_image()
+}

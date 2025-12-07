@@ -72,6 +72,17 @@ pub async fn ping() {
     web_sys::console::log_1(&format!("PING RESPONSE: {:?}", resp).into());
 }
 
+// define a Struct for the image
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ImageResponse {
+    pub path: String,
+}
+
+
+pub async fn pick_image() -> String {
+    let ret: ImageResponse = tauri("plugin:bliet|pick-image", ()).await;
+    ret.path
+}
 
 
 //

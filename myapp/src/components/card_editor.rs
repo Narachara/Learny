@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 use shared::models::{Card, Block, Deck};
 use crate::components::BlockEditor;
 use crate::app::Route;
-use crate::tauri_api::{get_card, add_card ,update_card_name, save_card_blocks };
+use crate::tauri_api::{get_card, add_card ,update_card_name, save_card_blocks, pick_image };
 
 
 #[derive(Clone, PartialEq, Copy)]
@@ -137,10 +137,22 @@ pub fn CardEditor(mode: EditorMode) -> Element {
 
             button {
                 onclick: move |_| {
-                    front_blocks.write().push(Block::Image { src: "".into() } );
+                    // spawn async task because file picker is async
+                    let mut front_blocks = front_blocks.clone();
+                    spawn(async move {
+                        // Call the plugin
+                        if let path = pick_image().await {
+                            // Insert a new Block::Image into the editor
+                            front_blocks.write().push(Block::Image { src: path });
+                        } else {
+                            // User cancelled picker — do nothing
+                            println!("Image picking canceled");
+                        }
+                    });
                 },
                 "+ Add Image Block"
             }
+
 
             //
             // BACK BLOCKS

@@ -267,9 +267,3 @@ pub fn update_card_name(app: tauri::AppHandle, id: i64, name: String) -> Result<
     ).map_err(|e| e.to_string())?;
     Ok(())
 }
-
-
-// #[tauri::command]
-// async fn pick_image(app: tauri::AppHandle) -> Result<String, String> {
-//     crate::android::pick_image(app).await
-// }
