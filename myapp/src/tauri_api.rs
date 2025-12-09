@@ -1,4 +1,4 @@
-use wasm_bindgen::prelude::*;
+use wasm_bindgen::{prelude::*, JsCast};
 use serde::{Serialize, de::DeserializeOwned, Deserialize};
 use serde_wasm_bindgen;
 use shared::models::{Deck, Card, Block};
@@ -13,6 +13,7 @@ extern "C" {
         js_name = invoke
     )]
     async fn invoke_raw(cmd: &str, args: JsValue) -> JsValue;
+
 }
 
 
@@ -43,34 +44,6 @@ where
 // ─────────────────────────────────────────────
 //
 
-
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct PingRequest {
-    value: String,
-}
-
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct PingArgs {
-    payload: PingRequest,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct PingResponse {
-    pub value: String,
-}
-
-pub async fn ping() {
-    let payload = PingArgs {
-        payload: PingRequest {
-            value: "Hello".into(),
-        }
-    };
-
-    let resp: PingResponse = tauri("plugin:bliet|ping", payload).await;
-    web_sys::console::log_1(&format!("PING RESPONSE: {:?}", resp).into());
-}
 
 // define a Struct for the image
 #[derive(Debug, Serialize, Deserialize)]

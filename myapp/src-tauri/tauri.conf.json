@@ -18,7 +18,13 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": [
+          "appimg"
+        ]
+      }
     }
   },
   "bundle": {
@@ -32,6 +38,5 @@
       "icons/icon.ico"
     ]
   },
-  "plugins": {
-  }
+  "plugins": {}
 }

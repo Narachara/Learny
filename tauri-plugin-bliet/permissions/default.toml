@@ -3,6 +3,5 @@
 [default]
 description = "Default permissions for the plugin"
 permissions = [
-  "bliet:allow-ping",
   "bliet:allow-pick-image"
 ]

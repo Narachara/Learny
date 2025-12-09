@@ -8,33 +8,6 @@ use crate::tauri_api::{get_cards};
 #[component]
 pub fn CardListPage(id: i64) -> Element {
     let nav = navigator();
-
-    // Example cards:
-    // let cards = vec![
-    //     Card {
-    //         id: 1,
-    //         name: "Yea".into(),
-    //         deck_id: id,
-    //         front_blocks: vec![Block::Text { value: "What is Rust?".into() }],
-    //         back_blocks: vec![Block::Text { value: "A programming language".into() }],
-    //         created_at: 0,
-    //         times_seen: 0,
-    //         times_correct: 0,
-    //         tags: None,
-    //     },
-    //     Card {
-    //         id: 2,
-    //         name: "Yea2".into(),
-    //         deck_id: id,
-    //         front_blocks: vec![Block::Text { value: "2 + 2 = ?".into() }],
-    //         back_blocks: vec![Block::Math { value: "4".into() }],
-    //         created_at: 0,
-    //         times_seen: 0,
-    //         times_correct: 0,
-    //         tags: None,
-    //     }
-    // ];
-
     let mut cards = use_signal(|| Vec::<Card>::new());
 
     use_effect(move || {

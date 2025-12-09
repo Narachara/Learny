@@ -7,7 +7,7 @@ pub enum Block {
     Text { value: String },
     Math { value: String },
     Image { src: String },
-    File { name: String, path: String },  // coming soon
+    File { name: String, path: String },
 }
 
 impl Block {

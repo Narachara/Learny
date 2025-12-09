@@ -35,10 +35,6 @@ pub struct Bliet<R: Runtime>(PluginHandle<R>);
 // API Implementations
 // ================================
 impl<R: Runtime> Bliet<R> {
-    pub fn ping(&self, payload: PingRequest) -> crate::Result<PingResponse> {
-        self.0.run_mobile_plugin("ping", payload).map_err(Into::into)
-    }
-
     pub fn pick_image(&self) -> crate::Result<String> {
         // Match the JSON returned by Kotlin:
         // { "path": "..." }

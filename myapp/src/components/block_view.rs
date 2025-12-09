@@ -8,8 +8,7 @@ pub fn MathBlock(value: String) -> Element {
         dangerous_inner_html: "{value}",
 
         onmounted: move |_| {
-            let js =
-                r#"setTimeout(() => {window.renderMath && window.renderMath();}, 50);"#;
+            let js = r#"setTimeout(() => {window.renderMath && window.renderMath();}, 50);"#;
             let _ = dioxus::document::eval(js);
         },
     })
@@ -21,7 +20,20 @@ pub fn render_block(block: &Block) -> Element {
 
         Block::Math { value } => { rsx!(MathBlock { value: value.clone() }) }
 
-        Block::Image { src } => { rsx!(img { class: "block-image", src: "{src}" }) }
+        Block::Image { src } => {
+            let url = if cfg!(target_os = "android") {
+                format!("http://appimg.localhost/{}", src)
+            } else {
+                format!("appimg://{}", src)
+            };
+
+            web_sys::console::log_1(&format!("IMG FINAL SRC = {}", url).into());
+
+            rsx!(img {
+                class: "block-image",
+                src: "{url}",
+            })
+        }
 
         Block::File { name, path } => { rsx!(p { "{name} {path}" }) }
     }

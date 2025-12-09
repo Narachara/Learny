@@ -3,10 +3,11 @@ package com.myapp.app
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
-import app.tauri.TauriActivity
-import com.plugin.bliet.ExamplePlugin  // Import your plugin
+import app.tauri.plugin.PluginHandle
+import app.tauri.plugin.PluginManager
+import com.plugin.bliet.ExamplePlugin
 
-class CustomMainActivity : TauriActivity() {
+open class CustomMainActivity : TauriActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -14,8 +15,20 @@ class CustomMainActivity : TauriActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        // Forward the result to your plugin
-        val plugin = this.plugins.get("bliet") as? ExamplePlugin
-        plugin?.handleActivityResult(requestCode, resultCode, data)
+        findPlugin<ExamplePlugin>("bliet")?.handleActivityResult(requestCode, resultCode, data)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <T> findPlugin(id: String): T? {
+        return try {
+            val field = PluginManager::class.java.getDeclaredField("plugins").apply {
+                isAccessible = true
+            }
+            val pluginMap = field.get(pluginManager) as? Map<*, *>
+            val handle = pluginMap?.get(id) as? PluginHandle
+            handle?.instance as? T
+        } catch (e: Exception) {
+            null
+        }
     }
 }

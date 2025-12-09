@@ -4,7 +4,6 @@ Default permissions for the plugin
 
 #### This default permission set includes the following:
 
-- `bliet:allow-ping`
 - `bliet:allow-pick-image`
 
 ## Permission Table
