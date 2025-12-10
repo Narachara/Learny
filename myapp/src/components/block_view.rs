@@ -24,7 +24,7 @@ pub fn render_block(block: &Block) -> Element {
             let url = if cfg!(target_os = "android") {
                 format!("http://appimg.localhost/{}", src)
             } else {
-                format!("appimg://{}", src)
+                format!("http://appimg.localhost{}", src)
             };
 
             web_sys::console::log_1(&format!("IMG FINAL SRC = {}", url).into());
