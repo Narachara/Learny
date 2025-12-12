@@ -35,7 +35,7 @@ pub struct Bliet<R: Runtime>(PluginHandle<R>);
 // API Implementations
 // ================================
 impl<R: Runtime> Bliet<R> {
-    pub fn pick_image(&self) -> crate::Result<String> {
+    pub async fn pick_image(&self) -> crate::Result<String> {
         // Match the JSON returned by Kotlin:
         // { "path": "..." }
         #[derive(serde::Deserialize)]

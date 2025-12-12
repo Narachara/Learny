@@ -1,7 +1,5 @@
 mod db;
-use tauri::Manager;
 use tauri::http;
-use std::borrow::Cow;
 use mime_guess;
 use crate::db::{
     init_db,
@@ -126,6 +124,7 @@ pub fn run() {
     //
     builder
         .plugin(tauri_plugin_bliet::init())
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             init_db,
             add_deck,

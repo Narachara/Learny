@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use shared::models::{Card, Block};
+use shared::models::{Card};
 use crate::components::block_view::render_block;
 use crate::components::card_list_page::CardListPage;
 use crate::components::{CardEditorEdit};

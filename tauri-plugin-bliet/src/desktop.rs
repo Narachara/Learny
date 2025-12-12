@@ -1,7 +1,9 @@
 use serde::de::DeserializeOwned;
 use tauri::{plugin::PluginApi, AppHandle, Runtime};
-
+use crate::Result;
 use crate::models::*;
+use tauri_plugin_dialog::DialogExt;
+
 
 pub fn init<R: Runtime, C: DeserializeOwned>(
   app: &AppHandle<R>,
@@ -11,25 +13,26 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
 }
 
 /// Access to the bliet APIs.
-pub struct Bliet<R: Runtime>(AppHandle<R>);
+pub struct Bliet<R: Runtime>(pub AppHandle<R>);
 
-use tauri::api::dialog::FileDialogBuilder;
 
 impl<R: Runtime> Bliet<R> {
-    pub fn pick_image(&self) -> crate::Result<String> {
-        let (tx, rx) = std::sync::mpsc::channel();
+    pub async fn pick_image(&self) -> Result<String> {
+        let (tx, mut rx) = tauri::async_runtime::channel(1);
 
-        FileDialogBuilder::new()
+        self.0
+            .dialog()
+            .file()
             .add_filter("Images", &["png", "jpg", "jpeg"])
-            .pick_file(move |file_path| {
+            .pick_file(move |path| {
                 let _ = tx.send(
-                    file_path
-                        .map(|p| p.to_string_lossy().to_string())
+                    path.map(|p| p.to_string().to_string())
                         .unwrap_or_default(),
                 );
             });
 
-        let result = rx.recv().unwrap_or_default();
+        // Async await — DOES NOT BLOCK UI
+        let result = rx.recv().await.unwrap_or_default();
         Ok(result)
     }
 }
