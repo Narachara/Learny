@@ -3,14 +3,22 @@ use tauri::Manager;
 use rusqlite::{params, Connection};
 use shared::models::*;
 use serde_json;
+use std::fs;
+use std::path::PathBuf;
 
 pub fn open_db(app: &tauri::AppHandle) -> Result<Connection, String> {
-    let path = app
+    let app_data_dir = app
         .path()
-        .resolve("cards.db", BaseDirectory::AppData)
+        .app_data_dir()
         .map_err(|e| e.to_string())?;
 
-    Connection::open(path).map_err(|e| e.to_string())
+    // ⭐ CRITICAL LINE — create directory
+    fs::create_dir_all(&app_data_dir)
+        .map_err(|e| format!("failed to create app data dir: {}", e))?;
+
+    let db_path = app_data_dir.join("cards.db");
+
+    Connection::open(db_path).map_err(|e| e.to_string())
 }
 
 

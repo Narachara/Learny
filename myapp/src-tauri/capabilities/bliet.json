@@ -1,9 +1,9 @@
 {
   "$schema": "../gen/schemas/mobile-schema.json",
   "identifier": "bliet-mobile-capability",
-  "description": "Allows the bliet plugin's mobile commands",
+  "description": "Allows the bliet plugin's commands",
   "windows": ["main"],
-  "platforms": ["android", "iOS"],
+  "platforms": ["android", "iOS", "macOS", "linux", "windows"],
   "permissions": [
     "bliet:allow-pick-image"
   ]

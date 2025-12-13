@@ -295,28 +295,16 @@
       "type": "string",
       "oneOf": [
         {
-          "description": "Enables the pick-image command without any pre-configured scope.",
+          "description": "Enables the pick_image command without any pre-configured scope.",
           "type": "string",
           "const": "allow-pick-image",
-          "markdownDescription": "Enables the pick-image command without any pre-configured scope."
+          "markdownDescription": "Enables the pick_image command without any pre-configured scope."
         },
         {
-          "description": "Denies the pick-image command without any pre-configured scope.",
+          "description": "Denies the pick_image command without any pre-configured scope.",
           "type": "string",
           "const": "deny-pick-image",
-          "markdownDescription": "Denies the pick-image command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the ping command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-ping",
-          "markdownDescription": "Enables the ping command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the ping command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-ping",
-          "markdownDescription": "Denies the ping command without any pre-configured scope."
+          "markdownDescription": "Denies the pick_image command without any pre-configured scope."
         },
         {
           "description": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `bliet:allow-pick-image`",

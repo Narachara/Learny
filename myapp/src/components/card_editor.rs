@@ -40,6 +40,7 @@ pub fn CardEditor(mode: EditorMode) -> Element {
     // State for the card being edited
     let mut card = use_signal(|| None::<Card>);
 
+
     //
     // MODE-DEPENDENT INITIALIZATION
     //
@@ -141,13 +142,9 @@ pub fn CardEditor(mode: EditorMode) -> Element {
                     let mut front_blocks = front_blocks.clone();
                     spawn(async move {
                         // Call the plugin
-                        if let path = pick_image().await {
-                            // Insert a new Block::Image into the editor
-                            front_blocks.write().push(Block::Image { src: path });
-                        } else {
-                            // User cancelled picker — do nothing
-                            println!("Image picking canceled");
-                        }
+                        let path = pick_image().await;
+                        // Insert a new Block::Image into the editor
+                        front_blocks.write().push(Block::Image { src: path });
                     });
                 },
                 "+ Add Image Block"

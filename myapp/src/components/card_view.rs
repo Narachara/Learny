@@ -1,11 +1,10 @@
 use dioxus::prelude::*;
-use shared::models::{Card};
+use shared::models::{ Card };
 use crate::components::block_view::render_block;
 use crate::components::card_list_page::CardListPage;
-use crate::components::{CardEditorEdit};
+use crate::components::{ CardEditorEdit };
 use crate::app::Route;
 use crate::tauri_api::{ get_card };
-
 
 fn card_score(times_known: u32, times_done: u32) -> f64 {
     if times_done == 0 {
@@ -21,13 +20,12 @@ fn card_score(times_known: u32, times_done: u32) -> f64 {
     -p.ln()
 }
 
-
 #[component]
 pub fn CardView(id: i64) -> Element {
     let mut show_answer = use_signal(|| false);
     let nav = navigator();
 
-    let mut card = use_signal( || Card::new_empty(id) );
+    let mut card = use_signal(|| Card::new_empty(id));
 
     use_effect(move || {
         spawn(async move {
@@ -37,6 +35,8 @@ pub fn CardView(id: i64) -> Element {
     });
 
     let card = card.read();
+    let deck_id = card.deck_id; // Copy or clone here
+
 
     rsx! {
         div { class: "card-list-page",
@@ -65,16 +65,15 @@ pub fn CardView(id: i64) -> Element {
         }
 
         button {
-    class: "edit-button",
-    onclick: move |_| {
-        nav.push(Route::CardEditorEdit { id: id });
-    },
-    "Edit Card"
-}
+            class: "edit-button",
+            onclick: move |_| {
+            nav.push(Route::CardEditorEdit { id: id }); },
+            "Edit Card"
+        }
 
         button {
             class: "back-button",
-            onclick: move |_| { nav.push(Route::CardListPage { id: id }); },
+            onclick: move |_| { nav.push(Route::CardListPage { id: deck_id }); },
             "Back"
         }
     }

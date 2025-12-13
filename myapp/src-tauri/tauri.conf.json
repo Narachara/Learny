@@ -22,7 +22,8 @@
       "assetProtocol": {
         "enable": true,
         "scope": ["*"]
-      }
+      },
+      "capabilities": ["default"]
     }
   },
   "bundle": {

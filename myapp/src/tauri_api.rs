@@ -1,9 +1,9 @@
-use wasm_bindgen::{prelude::*, JsCast};
+use wasm_bindgen::{prelude::*};
 use serde::{Serialize, de::DeserializeOwned, Deserialize};
 use serde_wasm_bindgen;
 use shared::models::{Deck, Card, Block};
 use wasm_bindgen::JsValue;
-use web_sys::console;
+use shared::ImageResponse;
 
 /// Bind to Tauri’s real invoke()
 #[wasm_bindgen]
@@ -23,17 +23,7 @@ where
     A: Serialize,
 {
     let js_args = serde_wasm_bindgen::to_value(&args).unwrap();
-
-    console::log_1(&JsValue::from_str(&format!(
-        "ARGS for {} = {:?}",
-        cmd, js_args
-    )));
-
     let raw = invoke_raw(cmd, js_args).await;
-
-    web_sys::console::log_1(
-        &JsValue::from_str(&format!("RAW RESPONSE({}): {:?}", cmd, raw))
-    );
     serde_wasm_bindgen::from_value(raw).unwrap()
 }
 
@@ -45,15 +35,8 @@ where
 //
 
 
-// define a Struct for the image
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ImageResponse {
-    pub path: String,
-}
-
-
 pub async fn pick_image() -> String {
-    let ret: ImageResponse = tauri("plugin:bliet|pick-image", ()).await;
+    let ret: ImageResponse = tauri("plugin:bliet|pick_image", ()).await;
     ret.path
 }
 

@@ -32,11 +32,16 @@ pub fn App() -> Element {
         Script {
             src: asset!("./assets/mathjax-config.js"),
         },
-        // Load MathJax core
+
+        // Local MathJax core (NO CDN)
+        Script {
+            src: asset!("./assets/mathjax/es5/tex-mml-chtml.js"),
+        }
+/*         // Load MathJax core
         Script {
             src: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js",
-        },
-        document::Stylesheet { href: CSS },
+        }, */
+        Stylesheet { href: CSS },
         Router::<Route> {}
     }
 }

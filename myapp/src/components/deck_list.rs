@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use shared::models::*;
 use crate::app::Route;
-use crate::components::{ CardListPage, CreateDeck };
+use crate::components::{ CreateDeck };
 use crate::tauri_api::{ init_db, get_decks };
 
 
@@ -14,14 +14,12 @@ pub fn DeckList() -> Element {
     // state for decks loaded from DB
     let mut decks = use_signal(|| Vec::<Deck>::new());
 
-
     // Initialize database + load decks once on mount
-    use_effect(move || {
-        spawn(async move {
-            init_db().await;
-            let loaded = get_decks().await;
-            decks.set(loaded);
-        });
+
+    use_future(move || async move {
+        init_db().await;
+        let loaded = get_decks().await;
+        decks.set(loaded);
     });
 
     let deck_views: Vec<(i64, String)> = decks

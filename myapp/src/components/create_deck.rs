@@ -1,7 +1,4 @@
 use dioxus::prelude::*;
-use shared::models::*;
-use crate::app::Route;
-use crate::components::{DeckList};
 use crate::tauri_api::add_deck;
 
 #[component]
