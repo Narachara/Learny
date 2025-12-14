@@ -23,14 +23,21 @@ pub fn run() {
         // FULL URI: appimg://localhost/Files/5755e5a2-91de-4077-b610-f531e8fdddc3.png
         println!("FULL URI: {}", request.uri());
 
-        let raw_path = request.uri().path();
-        let decoded = urlencoding::decode(raw_path).unwrap();
-        // 2. Convert URL path → virtual path
-        let virtual_path = decoded.trim_start_matches('/'); // "Files/uuid.png"
+        let uri = request.uri();
 
-        // 3. Resolve virtual path inside app data dir
+        let raw_path = uri.path();
+        let decoded = urlencoding::decode(raw_path).unwrap();
+
+        let mut virtual_path = decoded.trim_start_matches('/').to_string();
+
+        if let Some(host) = uri.host() {
+            if host != "localhost" && !virtual_path.starts_with(&format!("{}/", host)) {
+                virtual_path = format!("{}/{}", host, virtual_path);
+            }
+        }
+
         let app_data_dir = _ctx.app_handle().path().app_data_dir().unwrap();
-        let full_path = app_data_dir.join(virtual_path);
+        let full_path = app_data_dir.join(&virtual_path);
 
         println!("APP DATA DIR : {}", app_data_dir.display());
         println!("VIRTUAL PATH : {}", virtual_path);

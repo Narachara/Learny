@@ -26,8 +26,16 @@ fn appimg_url_from_virtual_path(virtual_path: &str) -> String {
         .collect::<Vec<_>>()
         .join("/");
 
-    // format!("appimg:///{}", encoded)
-    format!("http://appimg.localhost/{}", encoded)
+    let needs_http = cfg!(any(
+        target_os = "windows",
+        target_os = "android"
+    ));
+
+    if needs_http {
+        format!("http://appimg.localhost/{}", encoded)
+    } else {
+        format!("appimg://{}", encoded)
+    }
 }
 
 

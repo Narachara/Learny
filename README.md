@@ -15,4 +15,5 @@ rm -rf MathJax-3.2.2 mathjax.zip
 
 ## TODO:
 - [ ] deletetion of cards and decks, with warning dialog
-- [ ] saving zip files, just the same as images, works for desktop but mobile must be done
+- [ ] saving zip files, just the same as images, works for windows + Macos but mobile must be done
+- [ ] Block reordering implementieren
