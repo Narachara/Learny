@@ -4,6 +4,7 @@
   "description": "Default desktop capabilities",
   "windows": ["main"],
   "permissions": [
-    "bliet:allow-pick-image"
+    "bliet:allow-pick-image",
+    "bliet:allow-pick-archive"
   ]
 }

@@ -1,7 +1,7 @@
 use serde::de::DeserializeOwned;
 use serde_json::json;
 use tauri::{ plugin::{ PluginApi, PluginHandle }, AppHandle, Runtime };
-use shared::ImageResponse;
+use shared::FileResponse;
 use crate::models::*;
 
 #[cfg(target_os = "ios")]
@@ -32,19 +32,18 @@ pub struct Bliet<R: Runtime>(PluginHandle<R>);
 // API Implementations
 // ================================
 impl<R: Runtime> Bliet<R> {
-    pub async fn pick_image(&self) -> crate::Result<ImageResponse>{
+    pub async fn pick_image(&self) -> crate::Result<Option<FileResponse>> {
         // Match the JSON returned by Kotlin:
         // { "path": "..." }
         #[derive(serde::Deserialize)]
-        struct PickImageResponse {
+        struct PickFileResponse {
             path: Option<String>,
         }
 
-        let resp: PickImageResponse = self.0.run_mobile_plugin("pickImage", json!({}))?;
+        let resp: PickFileResponse = self.0.run_mobile_plugin("pickImage", json!({}))?;
 
-
-        Ok(ImageResponse {
+        Ok(Some(FileResponse {
             path: resp.path.unwrap_or_default(),
-        })
+        }))
     }
 }

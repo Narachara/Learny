@@ -17,6 +17,7 @@ tauri-plugin-dialog = "2"
 oneshot = "0.1"
 futures = "*"
 shared = { path = "../myapp/shared" }
+uuid = { version ="1.19.0" , features = ["v4"] }
 
 [build-dependencies]
 tauri-plugin = { version = "2.5.1", features = ["build"] }

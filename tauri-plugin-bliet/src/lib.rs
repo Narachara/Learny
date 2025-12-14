@@ -34,7 +34,7 @@ impl<R: Runtime, T: Manager<R>> crate::BlietExt<R> for T {
 /// Initializes the plugin.
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
   Builder::new("bliet")
-    .invoke_handler(tauri::generate_handler![commands::pick_image])
+    .invoke_handler(tauri::generate_handler![commands::pick_image, commands::pick_archive])
     .setup(|app, api| {
       #[cfg(mobile)]
       let bliet = mobile::init(app, api)?;

@@ -18,6 +18,32 @@ Default permissions for the plugin
 <tr>
 <td>
 
+`bliet:allow-pick-archive`
+
+</td>
+<td>
+
+Enables the pick_archive command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`bliet:deny-pick-archive`
+
+</td>
+<td>
+
+Denies the pick_archive command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
 `bliet:allow-pick-image`
 
 </td>

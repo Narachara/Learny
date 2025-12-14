@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 use shared::models::{Card, Block, Deck};
 use crate::components::BlockEditor;
 use crate::app::Route;
-use crate::tauri_api::{get_card, add_card ,update_card_name, save_card_blocks, pick_image };
+use crate::tauri_api::{get_card, add_card ,update_card_name, save_card_blocks, pick_image, pick_archive };
 
 
 #[derive(Clone, PartialEq, Copy)]
@@ -138,16 +138,38 @@ pub fn CardEditor(mode: EditorMode) -> Element {
 
             button {
                 onclick: move |_| {
-                    // spawn async task because file picker is async
-                    let mut front_blocks = front_blocks.clone();
                     spawn(async move {
                         // Call the plugin
                         let path = pick_image().await;
-                        // Insert a new Block::Image into the editor
-                        front_blocks.write().push(Block::Image { src: path });
+                        web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+                            "path returned from file picker is: {}",
+                            path
+                        )));
+                        if path != "" {
+                            // Insert a new Block::Image into the editor
+                            front_blocks.write().push(Block::Image { src: path });
+                        }
                     });
                 },
                 "+ Add Image Block"
+            }
+
+            button {
+                onclick: move |_| {
+                        spawn(async move {
+                        // Call the plugin
+                        let path = pick_archive().await;
+                        web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+                            "path returned from file picker is: {}",
+                            path
+                        )));
+                        if path != "" {
+                            front_blocks.write().push(Block::File { path: path });
+                        }
+                    });
+
+                },
+                "+ Add File Block"
             }
 
 

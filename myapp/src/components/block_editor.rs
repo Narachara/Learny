@@ -63,10 +63,9 @@ pub fn BlockEditor(
             }
         ),
 
-        Block::File { name, path } => rsx!(
+        Block::File { path } => rsx!(
             div { class: "block-editor file-editor",
-                p { "File: {name}" }
-                p { "Stored at: {path}" }
+                p { "File Stored at: {path}" }
                 button {
                     onclick: move |_| on_remove.call(()),
                     "Remove"

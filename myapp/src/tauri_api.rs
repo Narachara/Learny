@@ -3,7 +3,7 @@ use serde::{Serialize, de::DeserializeOwned, Deserialize};
 use serde_wasm_bindgen;
 use shared::models::{Deck, Card, Block};
 use wasm_bindgen::JsValue;
-use shared::ImageResponse;
+use shared::FileResponse;
 
 /// Bind to Tauri’s real invoke()
 #[wasm_bindgen]
@@ -36,8 +36,41 @@ where
 
 
 pub async fn pick_image() -> String {
-    let ret: ImageResponse = tauri("plugin:bliet|pick_image", ()).await;
-    ret.path
+    let ret: Option<FileResponse> =
+        tauri("plugin:bliet|pick_image", ()).await;
+
+    match ret {
+        Some(image) => image.path,
+        None => String::new(), // ← user cancelled
+    }
+}
+
+pub async fn pick_archive() -> String {
+    let ret: Option<FileResponse> =
+        tauri("plugin:bliet|pick_archive", ()).await;
+
+    match ret {
+        Some(archive) => archive.path,
+        None => String::new(), // ← user cancelled
+    }
+}
+
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DownloadFileArgs {
+    virtual_path: String,
+}
+
+
+pub async fn download_file(path: String) -> String {
+    let ret: Option<FileResponse> =
+        tauri("download_file", DownloadFileArgs { virtual_path: path } ).await;
+
+    match ret {
+        Some(archive) => archive.path,
+        None => String::new(), // ← user cancelled
+    }
 }
 
 

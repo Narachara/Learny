@@ -5,6 +5,8 @@ use shared::models::*;
 use serde_json;
 use std::fs;
 use std::path::PathBuf;
+use tauri_plugin_dialog::{ DialogExt, FileDialogBuilder, FilePath };
+use futures::channel::oneshot;
 
 pub fn open_db(app: &tauri::AppHandle) -> Result<Connection, String> {
     let app_data_dir = app
@@ -273,5 +275,41 @@ pub fn update_card_name(app: tauri::AppHandle, id: i64, name: String) -> Result<
         "UPDATE card SET name = ?1 WHERE id = ?2",
         params![name, id]
     ).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+
+#[tauri::command]
+pub async fn download_file(
+    app: tauri::AppHandle,
+    virtual_path: String,
+) -> Result<(), String> {
+    let app_data_dir = app.path().app_data_dir()
+        .map_err(|e| e.to_string())?;
+
+    let source = app_data_dir.join(&virtual_path);
+
+    let Some(file_name) = source.file_name() else {
+        return Err("Invalid path".into());
+    };
+
+    let (tx, rx) = oneshot::channel();
+
+    FileDialogBuilder::new(app.dialog().clone())
+        .set_file_name(file_name.to_string_lossy())
+        .save_file(move |file| {
+            let _ = tx.send(file);
+        });
+
+    let dest = rx.await.map_err(|e| e.to_string())?;
+
+    let Some(FilePath::Path(dest_path)) = dest else {
+        // user cancelled → not an error
+        return Ok(());
+    };
+
+    std::fs::copy(&source, &dest_path)
+        .map_err(|e| e.to_string())?;
+
     Ok(())
 }

@@ -1,6 +1,6 @@
 mod db;
 use tauri::http;
-use tauri::Manager;
+use tauri::{Manager, AppHandle};
 use mime_guess;
 use urlencoding;
 use crate::db::{
@@ -12,40 +12,34 @@ use crate::db::{
     update_card_name,
     get_card,
     get_cards,
+    download_file,
 };
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let mut builder = tauri::Builder::default();
+    let mut builder = tauri::Builder::default()
+    .register_uri_scheme_protocol("appimg", |_ctx, request| {
+        println!("🔥 APPIMG HANDLER HIT 🔥");
+        // FULL URI: appimg://localhost/Files/5755e5a2-91de-4077-b610-f531e8fdddc3.png
+        println!("FULL URI: {}", request.uri());
 
-    builder = builder.setup(|app| {
-        #[cfg(debug_assertions)] // only include this code on debug builds
-        {
-            let window = app.get_webview_window("main").unwrap();
-            window.open_devtools();
-            window.close_devtools();
-        }
-        Ok(())
-    });
-
-    builder = builder.register_uri_scheme_protocol("appimg", |_ctx, request| {
         let raw_path = request.uri().path();
         let decoded = urlencoding::decode(raw_path).unwrap();
+        // 2. Convert URL path → virtual path
+        let virtual_path = decoded.trim_start_matches('/'); // "Files/uuid.png"
 
-        println!("RAW URI PATH     : {}", raw_path);
-        println!("DECODED URI PATH : {}", decoded);
+        // 3. Resolve virtual path inside app data dir
+        let app_data_dir = _ctx.app_handle().path().app_data_dir().unwrap();
+        let full_path = app_data_dir.join(virtual_path);
 
-        
-        // Remove leading slash
-        let fs_path = &raw_path[1..];
-        let file_path = std::path::PathBuf::from(fs_path);
-        
-        println!("FS PATH          : {}", file_path.display());
-        println!("EXISTS?          : {}", file_path.exists());
-        
-        match std::fs::read(&file_path) {
+        println!("APP DATA DIR : {}", app_data_dir.display());
+        println!("VIRTUAL PATH : {}", virtual_path);
+        println!("FULL FS PATH : {}", full_path.display());
+        println!("EXISTS       : {}", full_path.exists());
+
+        match std::fs::read(&full_path) {
             Ok(bytes) => {
-                let mime = mime_guess::from_path(&file_path).first_or_octet_stream().to_string();
+                let mime = mime_guess::from_path(&full_path).first_or_octet_stream().to_string();
 
                 http::Response
                     ::builder()
@@ -62,12 +56,18 @@ pub fn run() {
                     .unwrap()
             }
         }
-    });
-
-    builder
-        .plugin(tauri_plugin_bliet::init())
-        .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(
+    })
+    .setup(|app| {
+        #[cfg(debug_assertions)] // only include this code on debug builds
+        {
+            let window = app.get_webview_window("main").unwrap();
+            window.open_devtools();
+            window.close_devtools();
+        }
+        Ok(())
+    })
+    .plugin(tauri_plugin_bliet::init()).plugin(tauri_plugin_dialog::init())
+    .invoke_handler(
             tauri::generate_handler![
                 init_db,
                 add_deck,
@@ -76,7 +76,8 @@ pub fn run() {
                 get_cards,
                 get_card,
                 save_card_blocks,
-                update_card_name
+                update_card_name,
+                download_file,
             ]
         )
         .run(tauri::generate_context!())

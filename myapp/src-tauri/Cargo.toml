@@ -29,3 +29,5 @@ tauri-plugin-bliet = { path = "../../tauri-plugin-bliet" }
 mime_guess = "2.0"
 urlencoding = "2.1"
 tauri-plugin-dialog = "2"
+oneshot = "0.1"
+futures = "*"
