@@ -2,7 +2,7 @@ use serde::{Serialize, Deserialize};
 
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
-#[serde(tag = "type")]
+#[serde(tag = "type")] // “When you serialize this enum, inject a field called type whose value is the variant name.”
 pub enum Block {
     Text { value: String },
     Math { value: String },

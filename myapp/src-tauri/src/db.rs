@@ -197,9 +197,9 @@ pub fn get_card(app: tauri::AppHandle, id: i64) -> Result<Card, String> {
 
     let rows = stmt.query_map([id], |row| {
         let side: String = row.get(0)?;
-        let content: String = row.get(2)?;
+        let content: String = row.get(2)?; //retrieves exactly this string, byte-for-byte: {"type":"Text","value":"Transform each sentence...\n\nYou finish..."}
 
-        let block: Block = serde_json::from_str(&content).unwrap();
+        let block: Block = serde_json::from_str(&content).unwrap(); // When deserialized, it becomes: Block::Text { value: "Hello" } and this is based on the tag. So the Tag decides what block tyoe the string gets serialized into :=)
         Ok((side, block))
     }).map_err(|e| e.to_string())?;
 
@@ -258,7 +258,7 @@ pub fn save_card_blocks(
                 card_id,
                 i as i64,
                 block.block_type(),
-                serde_json::to_string(block).unwrap()
+                serde_json::to_string(block).unwrap() // Becomes json because the block enum has serialze
             ],
         )
         .map_err(|e| e.to_string())?;
