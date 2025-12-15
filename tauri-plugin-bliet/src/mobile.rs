@@ -40,6 +40,9 @@ impl<R: Runtime> Bliet<R> {
             path: Option<String>,
         }
 
+        // TODO:
+        // Must create pick_archive and pick_image here like in desktop.rs
+
         let resp: PickFileResponse = self.0.run_mobile_plugin("pickImage", json!({}))?;
 
         Ok(Some(FileResponse {
