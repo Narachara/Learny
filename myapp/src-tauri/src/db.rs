@@ -48,11 +48,12 @@ pub fn init_db(app: tauri::AppHandle) -> Result<(), String> {
 
         CREATE TABLE IF NOT EXISTS block (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            card_id INTEGER NOT NULL REFERENCES card(id),
+            card_id INTEGER NOT NULL,
             side TEXT NOT NULL,
             position INTEGER NOT NULL,
             block_type TEXT NOT NULL,
-            content TEXT NOT NULL
+            content TEXT NOT NULL,
+            FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
         );
         "
     )
@@ -275,6 +276,72 @@ pub fn update_card_name(app: tauri::AppHandle, id: i64, name: String) -> Result<
         "UPDATE card SET name = ?1 WHERE id = ?2",
         params![name, id]
     ).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+// Delete operations
+
+fn delete_file_from_app_data(
+    app: &tauri::AppHandle,
+    virtual_path: &str,
+) -> Result<(), String> {
+    let app_data_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| e.to_string())?;
+
+    let full_path = app_data_dir.join(virtual_path);
+
+    if !full_path.exists() {
+        // already gone → not an error
+        return Ok(());
+    }
+
+    std::fs::remove_file(&full_path)
+        .map_err(|e| format!("Failed to delete {:?}: {}", full_path, e))?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub fn delete_card(app: tauri::AppHandle, id: i64) -> Result<(), String> {
+    let conn = open_db(&app)?;
+
+    conn.execute("PRAGMA foreign_keys = ON;", [])
+        .map_err(|e| e.to_string())?;
+
+    // Collect file paths
+    let mut stmt = conn
+        .prepare("SELECT content FROM block WHERE card_id = ?1")
+        .map_err(|e| e.to_string())?;
+
+    let paths: Vec<String> = stmt
+        .query_map(rusqlite::params![id], |row| row.get(0))
+        .map_err(|e| e.to_string())?
+        .filter_map(Result::ok)
+        .collect();
+
+    // Delete files (best effort)
+    for path in &paths {
+        let path = std::path::Path::new(path);
+        if path.exists() {
+            if let Err(err) = std::fs::remove_file(path) {
+                eprintln!("Failed to delete file {:?}: {}", path, err);
+            }
+        }
+    }
+
+    // Delete card (blocks cascade)
+    let affected = conn.execute(
+        "DELETE FROM card WHERE id = ?1",
+        rusqlite::params![id],
+    )
+    .map_err(|e| e.to_string())?;
+
+    if affected == 0 {
+        return Err(format!("No card found with id {}", id));
+    }
+
     Ok(())
 }
 

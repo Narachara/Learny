@@ -26,6 +26,8 @@ fn appimg_url_from_virtual_path(virtual_path: &str) -> String {
         .collect::<Vec<_>>()
         .join("/");
 
+        // TODO:
+        // this check doesnt work
     let needs_http = cfg!(any(
         target_os = "windows",
         target_os = "android"

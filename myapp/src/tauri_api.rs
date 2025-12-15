@@ -28,6 +28,18 @@ where
 }
 
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DeleteCardArgs {
+    id: i64,
+}
+
+pub async fn delete_card(id: i64) {
+    let _: () = tauri("delete_card", DeleteCardArgs { id }).await;
+}
+
+
+
 //
 // ─────────────────────────────────────────────
 //   Plugin Test

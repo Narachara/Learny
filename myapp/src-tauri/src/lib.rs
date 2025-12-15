@@ -13,6 +13,7 @@ use crate::db::{
     get_card,
     get_cards,
     download_file,
+    delete_card,
 };
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -85,6 +86,7 @@ pub fn run() {
                 save_card_blocks,
                 update_card_name,
                 download_file,
+                delete_card,
             ]
         )
         .run(tauri::generate_context!())
