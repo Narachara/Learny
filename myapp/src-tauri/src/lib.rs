@@ -18,7 +18,7 @@ use crate::db::{
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let mut builder = tauri::Builder::default()
+    let builder = tauri::Builder::default()
     .register_uri_scheme_protocol("appimg", |_ctx, request| {
         println!("🔥 APPIMG HANDLER HIT 🔥");
         // FULL URI: appimg://localhost/Files/5755e5a2-91de-4077-b610-f531e8fdddc3.png

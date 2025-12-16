@@ -28,6 +28,8 @@ fn appimg_url_from_virtual_path(virtual_path: &str) -> String {
 
         // TODO:
         // this check doesnt work
+        // Ich kann es sonst auch einfach beim kompilieren jeweils schnell ändern
+        // dann kann ich es umstellen
     let needs_http = cfg!(any(
         target_os = "windows",
         target_os = "android"

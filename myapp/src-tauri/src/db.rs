@@ -8,6 +8,7 @@ use std::path::PathBuf;
 use tauri_plugin_dialog::{ DialogExt, FileDialogBuilder, FilePath };
 use futures::channel::oneshot;
 
+
 pub fn open_db(app: &tauri::AppHandle) -> Result<Connection, String> {
     let app_data_dir = app
         .path()
@@ -23,6 +24,31 @@ pub fn open_db(app: &tauri::AppHandle) -> Result<Connection, String> {
     Connection::open(db_path).map_err(|e| e.to_string())
 }
 
+pub fn get_deck(app: &tauri::AppHandle, deck_id: i64) -> Result<Deck, String> {
+    let conn = open_db(app)?;
+
+    let deck = conn
+        .query_row(
+            "
+            SELECT id, name, created_at, card_count
+            FROM deck
+            WHERE id = ?
+            ",
+            [deck_id],
+            |row| {
+                Ok(Deck {
+                    id: row.get(0)?,
+                    name: row.get(1)?,
+                    created_at: row.get(2)?,
+                    card_count: row.get(3)?,
+                })
+            },
+        )
+        .map_err(|e| e.to_string())?;
+
+    Ok(deck)
+}
+
 
 #[tauri::command]
 pub fn init_db(app: tauri::AppHandle) -> Result<(), String> {
@@ -33,7 +59,8 @@ pub fn init_db(app: tauri::AppHandle) -> Result<(), String> {
         CREATE TABLE IF NOT EXISTS deck (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
-            created_at INTEGER NOT NULL
+            created_at INTEGER NOT NULL,
+            card_count INTEGER NOT NULL
         );
 
         CREATE TABLE IF NOT EXISTS card (
@@ -114,6 +141,9 @@ pub fn add_card(app: tauri::AppHandle, deck_id: i64, name: String) -> Result<i64
         params![deck_id, name, now],
     )
     .map_err(|e| e.to_string())?;
+
+    // TODO: 
+    // increment the deck card count by 1
 
     Ok(conn.last_insert_rowid())
 }
@@ -356,6 +386,9 @@ pub fn delete_card(app: tauri::AppHandle, id: i64) -> Result<(), String> {
     if affected == 0 {
         return Err(format!("No card found with id {}", id));
     }
+
+    // TODO: 
+    // decrement the deck card count by 1
 
     Ok(())
 }
