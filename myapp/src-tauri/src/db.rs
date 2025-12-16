@@ -297,6 +297,8 @@ fn delete_file_from_app_data(
         return Ok(());
     }
 
+    println!("Deleting the file {:#?}", full_path);
+
     std::fs::remove_file(&full_path)
         .map_err(|e| format!("Failed to delete {:?}: {}", full_path, e))?;
 
@@ -315,18 +317,31 @@ pub fn delete_card(app: tauri::AppHandle, id: i64) -> Result<(), String> {
         .prepare("SELECT content FROM block WHERE card_id = ?1")
         .map_err(|e| e.to_string())?;
 
-    let paths: Vec<String> = stmt
-        .query_map(rusqlite::params![id], |row| row.get(0))
+    let blocks: Vec<Block> = stmt
+        .query_map(rusqlite::params![id], |row| {
+            let content: String = row.get(0)?;
+            let block: Block = serde_json::from_str(&content)
+                .map_err(|e| rusqlite::Error::FromSqlConversionFailure(
+                    0,
+                    rusqlite::types::Type::Text,
+                    Box::new(e),
+                ))?;
+            Ok(block)
+        })
         .map_err(|e| e.to_string())?
         .filter_map(Result::ok)
         .collect();
 
-    // Delete files (best effort)
-    for path in &paths {
-        let path = std::path::Path::new(path);
-        if path.exists() {
-            if let Err(err) = std::fs::remove_file(path) {
-                eprintln!("Failed to delete file {:?}: {}", path, err);
+    for block in &blocks {
+        match block {
+            Block::Image { src } => {
+                delete_file_from_app_data(&app, src)?;
+            }
+            Block::File { path } => {
+                delete_file_from_app_data(&app, path)?;
+            }
+            _ => {
+                // Text / Math → nothing to delete
             }
         }
     }
