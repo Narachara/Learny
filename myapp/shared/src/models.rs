@@ -57,7 +57,7 @@ impl Card {
 }
 
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct Deck {
     pub id: i64,
     pub name: String,

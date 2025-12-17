@@ -1,8 +1,11 @@
 mod db;
+mod export;
+mod import;
 use tauri::http;
 use tauri::{Manager, AppHandle};
 use mime_guess;
 use urlencoding;
+use crate::export::export_deck;
 use crate::db::{
     init_db,
     add_deck,
@@ -12,13 +15,15 @@ use crate::db::{
     update_card_name,
     get_card,
     get_cards,
+    get_deck,
     download_file,
     delete_card,
+
 };
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let builder = tauri::Builder::default()
+    tauri::Builder::default()
     .register_uri_scheme_protocol("appimg", |_ctx, request| {
         println!("🔥 APPIMG HANDLER HIT 🔥");
         // FULL URI: appimg://localhost/Files/5755e5a2-91de-4077-b610-f531e8fdddc3.png
@@ -87,6 +92,7 @@ pub fn run() {
                 update_card_name,
                 download_file,
                 delete_card,
+                export_deck,
             ]
         )
         .run(tauri::generate_context!())

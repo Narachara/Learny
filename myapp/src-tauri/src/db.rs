@@ -24,8 +24,10 @@ pub fn open_db(app: &tauri::AppHandle) -> Result<Connection, String> {
     Connection::open(db_path).map_err(|e| e.to_string())
 }
 
-pub fn get_deck(app: &tauri::AppHandle, deck_id: i64) -> Result<Deck, String> {
-    let conn = open_db(app)?;
+
+#[tauri::command]
+pub fn get_deck(app: tauri::AppHandle, deck_id: i64) -> Result<Deck, String> {
+    let conn = open_db(&app)?;
 
     let deck = conn
         .query_row(
@@ -95,8 +97,8 @@ pub fn add_deck(app: tauri::AppHandle, name: String) -> Result<i64, String> {
     let now = chrono::Utc::now().timestamp();
 
     conn.execute(
-        "INSERT INTO deck (name, created_at) VALUES (?1, ?2)",
-        params![name, now],
+        "INSERT INTO deck (name, created_at, card_count) VALUES (?1, ?2, ?3)",
+        params![name, now, 0],
     )
     .map_err(|e| e.to_string())?;
 
@@ -108,7 +110,7 @@ pub fn get_decks(app: tauri::AppHandle) -> Result<Vec<Deck>, String> {
     let conn = open_db(&app)?;
 
     let mut stmt = conn
-        .prepare("SELECT id, name, created_at FROM deck ORDER BY id DESC")
+        .prepare("SELECT id, name, created_at, card_count FROM deck ORDER BY id DESC")
         .map_err(|e| e.to_string())?;
 
     let decks = stmt
@@ -117,7 +119,7 @@ pub fn get_decks(app: tauri::AppHandle) -> Result<Vec<Deck>, String> {
                 id: row.get(0)?,
                 name: row.get(1)?,
                 created_at: row.get(2)?,
-                card_count: 0, // filled later
+                card_count: row.get(3)?
             })
         })
         .map_err(|e| e.to_string())?

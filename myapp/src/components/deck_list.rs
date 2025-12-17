@@ -2,9 +2,7 @@ use dioxus::prelude::*;
 use shared::models::*;
 use crate::app::Route;
 use crate::components::{ CreateDeck };
-use crate::tauri_api::{ init_db, get_decks };
-
-
+use crate::tauri_api::{ init_db, get_decks, export_deck };
 
 #[component]
 pub fn DeckList() -> Element {
@@ -42,6 +40,18 @@ pub fn DeckList() -> Element {
                     },
                     "{name}"
                 }
+
+                button {
+                    class: "export-deck-button",
+                    onclick: move |_| { 
+                            // export decks
+                            spawn(async move {
+                                export_deck(id).await;
+                            });
+                    },
+                    "Export deck"
+                }
+
             }
 
             button {
@@ -49,6 +59,8 @@ pub fn DeckList() -> Element {
                 onclick: move |_| creating.set(true),
                 "Add deck"
             }
+
+
 
             if *creating.read() {
                 CreateDeck {

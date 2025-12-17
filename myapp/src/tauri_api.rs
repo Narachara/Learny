@@ -85,6 +85,17 @@ pub async fn download_file(path: String) -> String {
     }
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ExportDeckArgs {
+    deck_id: i64,
+}
+
+
+pub async fn export_deck(deck_id: i64) {
+    let _: () = tauri("export_deck", ExportDeckArgs { deck_id } ).await;
+}
+
 
 //
 // ─────────────────────────────────────────────
