@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 use shared::models::*;
 use crate::app::Route;
 use crate::components::{ CreateDeck };
-use crate::tauri_api::{ init_db, get_decks, export_deck };
+use crate::tauri_api::{ init_db, get_decks, export_deck, import_deck };
 
 #[component]
 pub fn DeckList() -> Element {
@@ -31,36 +31,55 @@ pub fn DeckList() -> Element {
 
             h1 { "Select a Deck" }
             // Render all decks from state
-            for (id, name) in deck_views {
+        for (id, name) in deck_views {
+            div { class: "deck-row",
+
                 button {
                     key: "{id}",
                     class: "deck-item",
                     onclick: move |_| {
-                        nav.push(Route::CardListPage { id: id });
+                        nav.push(Route::CardListPage { id });
                     },
                     "{name}"
                 }
 
-                button {
-                    class: "export-deck-button",
-                    onclick: move |_| { 
-                            // export decks
+                div { class: "deck-actions",
+                    button {
+                        class: "button",
+                        onclick: move |_| {
                             spawn(async move {
                                 export_deck(id).await;
                             });
-                    },
-                    "Export deck"
+                        },
+                        "Export"
+                    }
                 }
-
             }
+        }
 
+
+        div { class: "deck-global-actions",
             button {
-                class: "add-deck-button",
+                class: "button",
                 onclick: move |_| creating.set(true),
                 "Add deck"
             }
 
-
+            button {
+                class: "button",
+                onclick: move |_| {
+                    spawn(async move {
+                        let new_deck_id = import_deck().await;
+                        if new_deck_id > 0 {
+                            nav.push(Route::CardListPage { id: new_deck_id });
+                        }
+                        let loaded = get_decks().await;
+                        decks.set(loaded);
+                    });
+                },
+                "Import deck"
+            }
+        }
 
             if *creating.read() {
                 CreateDeck {

@@ -9,6 +9,15 @@ use tauri_plugin_dialog::{ DialogExt, FileDialogBuilder, FilePath };
 use futures::channel::oneshot;
 
 
+// TODO: Transaction support
+// Import/export currently calls add_deck / add_card / save_card_blocks,
+// each of which opens its own DB connection. This is correct but prevents
+// atomic imports. Future refactor: move SQL logic into *_tx helpers that
+// accept &Connection / &Transaction so multi-step operations can be
+// committed or rolled back as a single unit.
+
+
+
 pub fn open_db(app: &tauri::AppHandle) -> Result<Connection, String> {
     let app_data_dir = app
         .path()

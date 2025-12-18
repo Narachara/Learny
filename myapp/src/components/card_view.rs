@@ -6,7 +6,6 @@ use crate::components::{ CardEditorEdit };
 use crate::app::Route;
 use crate::tauri_api::{ get_card, delete_card };
 
-
 fn card_score(times_known: u32, times_done: u32) -> f64 {
     if times_done == 0 {
         return f64::INFINITY;
@@ -21,12 +20,8 @@ fn card_score(times_known: u32, times_done: u32) -> f64 {
     -p.ln()
 }
 
-
 #[component]
-pub fn DeleteCard(
-    card_id: i64,
-    on_done: EventHandler<()>,
-) -> Element {
+pub fn DeleteCard(card_id: i64, on_done: EventHandler<()>) -> Element {
     rsx! {
         div { class: "delete-card",
 
@@ -35,7 +30,7 @@ pub fn DeleteCard(
             div { class: "delete-actions",
 
                 button {
-                    class: "delete-yes-button",
+                    class: "button",
                     onclick: move |_| {
                         spawn(async move {
                             let _ = delete_card(card_id).await;
@@ -46,7 +41,7 @@ pub fn DeleteCard(
                 }
 
                 button {
-                    class: "delete-no-button",
+                    class: "button",
                     onclick: move |_| {
                         on_done.call(());
                     },
@@ -56,7 +51,6 @@ pub fn DeleteCard(
         }
     }
 }
-
 
 #[component]
 pub fn CardView(id: i64) -> Element {
@@ -77,9 +71,12 @@ pub fn CardView(id: i64) -> Element {
     let deck_id = card.deck_id;
 
     rsx! {
-        div { class: "card-view",
+    div { class: "card-view",
 
-            h1 { "{card.name}" }
+        h1 { class: "card-title", "{card.name}" }
+
+        // Study area
+        div { class: "card-study",
 
             div { class: "card-surface",
                 for block in &card.front_blocks {
@@ -87,10 +84,12 @@ pub fn CardView(id: i64) -> Element {
                 }
             }
 
-            button {
-                class: "show-answer-btn",
-                onclick: move |_| show_answer.set(true),
-                "Show answer"
+            if !*show_answer.read() {
+                button {
+                    class: "button button-primary",
+                    onclick: move |_| show_answer.set(true),
+                    "Show answer"
+                }
             }
 
             if *show_answer.read() {
@@ -100,30 +99,34 @@ pub fn CardView(id: i64) -> Element {
                     }
                 }
             }
+        }
+
+        // Actions
+        div { class: "card-actions",
 
             button {
-                class: "edit-button",
+                class: "button button-secondary",
                 onclick: move |_| {
                     nav.push(Route::CardEditorEdit { id });
                 },
-                "Edit Card"
+                "Edit"
             }
 
             button {
-                class: "delete-button",
+                class: "button button-danger",
                 onclick: move |_| deleting.set(true),
-                "Delete Card"
+                "Delete"
             }
 
             button {
-                class: "back-button",
+                class: "button button-secondary",
                 onclick: move |_| {
                     nav.push(Route::CardListPage { id: deck_id });
                 },
                 "Back"
             }
         }
-
+    }
         if *deleting.read() {
             DeleteCard {
                 card_id: id,
@@ -133,5 +136,6 @@ pub fn CardView(id: i64) -> Element {
                 }
             }
         }
+
     }
 }

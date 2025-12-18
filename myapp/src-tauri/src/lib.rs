@@ -6,6 +6,7 @@ use tauri::{Manager, AppHandle};
 use mime_guess;
 use urlencoding;
 use crate::export::export_deck;
+use crate::import::import_deck;
 use crate::db::{
     init_db,
     add_deck,
@@ -93,6 +94,7 @@ pub fn run() {
                 download_file,
                 delete_card,
                 export_deck,
+                import_deck,
             ]
         )
         .run(tauri::generate_context!())

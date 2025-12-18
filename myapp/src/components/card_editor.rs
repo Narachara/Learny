@@ -123,6 +123,7 @@ pub fn CardEditor(mode: EditorMode) -> Element {
 
             // ADDING BLOCKS
             button {
+                class: "button",
                 onclick: move |_| {
                     front_blocks.write().push(Block::Text { value: "".into() });
                 },
@@ -130,6 +131,7 @@ pub fn CardEditor(mode: EditorMode) -> Element {
             }
 
             button {
+                class: "button",
                 onclick: move |_| {
                     front_blocks.write().push(Block::Math { value: "".into() });
                 },
@@ -137,6 +139,7 @@ pub fn CardEditor(mode: EditorMode) -> Element {
             }
 
             button {
+                class: "button",
                 onclick: move |_| {
                     spawn(async move {
                         // Call the plugin
@@ -155,6 +158,7 @@ pub fn CardEditor(mode: EditorMode) -> Element {
             }
 
             button {
+                class: "button",
                 onclick: move |_| {
                         spawn(async move {
                         // Call the plugin
@@ -193,6 +197,7 @@ pub fn CardEditor(mode: EditorMode) -> Element {
 
             // adds an empty block
             button {
+                class: "button",
                 onclick: move |_| {
                     back_blocks.write().push(Block::Text { value: "".into() });
                 },
@@ -200,7 +205,7 @@ pub fn CardEditor(mode: EditorMode) -> Element {
             }
 
             button {
-                class: "save-btn",
+                class: "button",
 
                 onclick: move |_| {
                     let name = card_name.read().clone();
