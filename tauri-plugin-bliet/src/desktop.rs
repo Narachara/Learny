@@ -101,4 +101,36 @@ impl<R: Runtime> Bliet<R> {
     pub async fn pick_archive(&self) -> crate::Result<Option<FileResponse>> {
         self.pick_file(PickKind::Archive).await
     }
+
+    // TODO: 
+    // Fix this function to return the bytes instead of the writing directly to system
+    // this makes the plugin uncoupled from desktop
+
+    pub async fn pick_import_file(app: tauri::AppHandle) -> Result<i64, String> {
+        // 1️⃣ Ask user for file
+        let (tx, rx) = oneshot::channel();
+
+        FileDialogBuilder::new(app.dialog().clone())
+            .pick_file(move |file| {
+                let _ = tx.send(file);
+            });
+
+        let Some(FilePath::Path(path)) = rx.await.map_err(|e| e.to_string())?
+        else {
+            return Ok(0); // user cancelled
+        };
+
+        // 2️⃣ Read + import on blocking thread
+        let app_clone = app.clone();
+
+        tauri::async_runtime::spawn_blocking(move || {
+            let json = std::fs::read_to_string(path)
+                .map_err(|e| e.to_string())?;
+
+            let export = import_deck_json(&json)?;
+            import_deck_export(&app_clone, export)
+        })
+        .await
+        .map_err(|e| e.to_string())?
+    }
 }

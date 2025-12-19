@@ -44,3 +44,9 @@ impl From<futures::channel::oneshot::Canceled> for Error {
         Error::StringError("dialog was canceled".into())
     }
 }
+
+impl From<base64::DecodeError> for Error {
+    fn from(e: base64::DecodeError) -> Self {
+        Error::StringError(e.to_string())
+    }
+}
