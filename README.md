@@ -18,5 +18,4 @@ rm -rf MathJax-3.2.2 mathjax.zip
 - [ ] saving zip files, just the same as images, works for windows + Macos but mobile must be done
 - [ ] Block reordering implementieren
 - [ ] Styling
-- [ ] 
-- [ ] Styling
+- Den folder assets kann im top Level kann ich löschen
