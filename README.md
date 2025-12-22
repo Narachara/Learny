@@ -15,7 +15,7 @@ rm -rf MathJax-3.2.2 mathjax.zip
 
 ## TODO:
 - [ ] deletetion of decks, with warning dialog
-- [ ] saving zip files, just the same as images, works for windows + Macos but mobile must be done
 - [ ] Block reordering implementieren
 - [ ] Styling
-- Den folder assets kann im top Level kann ich löschen
+- [ ] Implement the deck export via the plugin and not in backend code
+- [ ] 

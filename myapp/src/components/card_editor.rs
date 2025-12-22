@@ -195,13 +195,59 @@ pub fn CardEditor(mode: EditorMode) -> Element {
                 }
             }
 
-            // adds an empty block
+            // ADDING BLOCKS
             button {
                 class: "button",
                 onclick: move |_| {
                     back_blocks.write().push(Block::Text { value: "".into() });
                 },
-                "+ Add Back Block"
+                "+ Add Text Block"
+            }
+
+            button {
+                class: "button",
+                onclick: move |_| {
+                    back_blocks.write().push(Block::Math { value: "".into() });
+                },
+                "+ Add Math Block"
+            }
+
+            button {
+                class: "button",
+                onclick: move |_| {
+                    spawn(async move {
+                        // Call the plugin
+                        let path = pick_image().await;
+                        web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+                            "path returned from file picker is: {}",
+                            path
+                        )));
+                        if path != "" {
+                            // Insert a new Block::Image into the editor
+                            back_blocks.write().push(Block::Image { src: path });
+                        }
+                    });
+                },
+                "+ Add Image Block"
+            }
+
+            button {
+                class: "button",
+                onclick: move |_| {
+                        spawn(async move {
+                        // Call the plugin
+                        let path = pick_archive().await;
+                        web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+                            "path returned from file picker is: {}",
+                            path
+                        )));
+                        if path != "" {
+                            back_blocks.write().push(Block::File { path: path });
+                        }
+                    });
+
+                },
+                "+ Add File Block"
             }
 
             button {

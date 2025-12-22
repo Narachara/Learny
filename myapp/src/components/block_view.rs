@@ -38,8 +38,8 @@ fn appimg_url_from_virtual_path(virtual_path: &str) -> String {
     if needs_http {
         format!("http://appimg.localhost/{}", encoded)
     } else {
-        format!("http://appimg.localhost/{}", encoded)
-        // format!("appimg://{}", encoded)
+        // format!("http://appimg.localhost/{}", encoded)
+        format!("appimg://{}", encoded)
     }
 }
 
