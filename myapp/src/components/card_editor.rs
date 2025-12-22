@@ -1,9 +1,15 @@
 use dioxus::prelude::*;
-use shared::models::{Card, Block, Deck};
+use shared::models::{ Card, Block, Deck };
 use crate::components::BlockEditor;
 use crate::app::Route;
-use crate::tauri_api::{get_card, add_card ,update_card_name, save_card_blocks, pick_image, pick_archive };
-
+use crate::tauri_api::{
+    get_card,
+    add_card,
+    update_card_name,
+    save_card_blocks,
+    pick_image,
+    pick_archive,
+};
 
 #[derive(Clone, PartialEq, Copy)]
 pub enum EditorMode {
@@ -39,7 +45,6 @@ pub fn CardEditor(mode: EditorMode) -> Element {
 
     // State for the card being edited
     let mut card = use_signal(|| None::<Card>);
-
 
     //
     // MODE-DEPENDENT INITIALIZATION
@@ -121,9 +126,11 @@ pub fn CardEditor(mode: EditorMode) -> Element {
                 }
             }
 
+            div { class: "add-block-buttons",
+        
             // ADDING BLOCKS
             button {
-                class: "button",
+                class: "button button-secondary",
                 onclick: move |_| {
                     front_blocks.write().push(Block::Text { value: "".into() });
                 },
@@ -131,7 +138,7 @@ pub fn CardEditor(mode: EditorMode) -> Element {
             }
 
             button {
-                class: "button",
+                class: "button button-secondary",
                 onclick: move |_| {
                     front_blocks.write().push(Block::Math { value: "".into() });
                 },
@@ -139,7 +146,7 @@ pub fn CardEditor(mode: EditorMode) -> Element {
             }
 
             button {
-                class: "button",
+                class: "button button-secondary",
                 onclick: move |_| {
                     spawn(async move {
                         // Call the plugin
@@ -158,7 +165,7 @@ pub fn CardEditor(mode: EditorMode) -> Element {
             }
 
             button {
-                class: "button",
+                class: "button button-secondary",
                 onclick: move |_| {
                         spawn(async move {
                         // Call the plugin
@@ -175,6 +182,8 @@ pub fn CardEditor(mode: EditorMode) -> Element {
                 },
                 "+ Add File Block"
             }
+
+        }
 
 
             //
@@ -195,9 +204,11 @@ pub fn CardEditor(mode: EditorMode) -> Element {
                 }
             }
 
+
+            div { class: "add-block-buttons",
             // ADDING BLOCKS
             button {
-                class: "button",
+                class: "button button-secondary",
                 onclick: move |_| {
                     back_blocks.write().push(Block::Text { value: "".into() });
                 },
@@ -205,7 +216,7 @@ pub fn CardEditor(mode: EditorMode) -> Element {
             }
 
             button {
-                class: "button",
+                class: "button button-secondary",
                 onclick: move |_| {
                     back_blocks.write().push(Block::Math { value: "".into() });
                 },
@@ -213,7 +224,7 @@ pub fn CardEditor(mode: EditorMode) -> Element {
             }
 
             button {
-                class: "button",
+                class: "button button-secondary",
                 onclick: move |_| {
                     spawn(async move {
                         // Call the plugin
@@ -232,7 +243,7 @@ pub fn CardEditor(mode: EditorMode) -> Element {
             }
 
             button {
-                class: "button",
+                class: "button button-secondary",
                 onclick: move |_| {
                         spawn(async move {
                         // Call the plugin
@@ -249,9 +260,10 @@ pub fn CardEditor(mode: EditorMode) -> Element {
                 },
                 "+ Add File Block"
             }
+        }
 
             button {
-                class: "button",
+                class: "button button-primary save-button",
 
                 onclick: move |_| {
                     let name = card_name.read().clone();

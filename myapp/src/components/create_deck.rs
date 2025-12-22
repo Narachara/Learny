@@ -18,7 +18,7 @@ pub fn CreateDeck(on_done: EventHandler<()>) -> Element {
             }
 
             button {
-                class: "add-deck-button",
+                class: "button button-primary ",
                 onclick: move |_| {
                     let name = deck_name.read().to_string();
                     if !name.is_empty() {

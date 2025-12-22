@@ -18,4 +18,4 @@ rm -rf MathJax-3.2.2 mathjax.zip
 - [ ] Block reordering implementieren
 - [ ] Styling
 - [ ] Implement the deck export via the plugin and not in backend code
-- [ ] 
+- [ ] Score function und progress bar

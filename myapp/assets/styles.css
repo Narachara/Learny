@@ -1,24 +1,22 @@
+/* ---------- Global reset ---------- */
+
 * {
     box-sizing: border-box;
 }
 
-:root {
-  --bg: #ffffff;
-  --fg: #0f1115;
-  --card: #f3f4f6;
-}
-
-[data-theme="dark"] {
-  --bg: #0f1115;
-  --fg: #e6e6eb;
-  --card: #1b1e24;
-}
-
 body {
-    font-family: system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--fg);
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f5f6f8;
+    color: #111;
+    padding-bottom: env(safe-area-inset-bottom);
 }
+
+.safe-bottom {
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+}
+
+/* ---------- Page layout ---------- */
 
 .page {
     max-width: 680px;
@@ -32,6 +30,8 @@ body {
     align-items: center;
 }
 
+/* ---------- Headings ---------- */
+
 h1 {
     font-size: 2rem;
     font-weight: 600;
@@ -39,21 +39,16 @@ h1 {
     margin-bottom: 32px;
 }
 
-h2 {
-    font-size: 1.4rem;
-    font-weight: 600;
-    margin-top: 32px;
-}
+/* ---------- Buttons ---------- */
 
 .button {
     appearance: none;
     border: none;
-    border-radius: 999px; /* pill */
+    border-radius: 999px;
     padding: 14px 18px;
 
     font-size: 1rem;
     font-weight: 500;
-    letter-spacing: 0.2px;
 
     cursor: pointer;
     user-select: none;
@@ -61,7 +56,9 @@ h2 {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+
+    background: #d1d1d1;
+    color: #111;
 
     transition:
         background 0.15s ease,
@@ -69,76 +66,87 @@ h2 {
         transform 0.12s ease;
 }
 
-
-.button-primary {
-    background: #4177f6;
-    color: white;
-    box-shadow: 0 6px 14px rgba(65,119,246,0.25);
+.button:hover {
+    background: #c6c6c6;
 }
 
-.button-primary:hover {
-    background: #2f63db;
-    transform: translateY(-1px);
+.button:active {
+    transform: translateY(1px);
 }
 
-.button-secondary {
-    background: #f3f4f6;
-    color: #333;
-}
-
-.button-secondary:hover {
-    background: #e7e8eb;
-}
-
-.button-danger {
-    background: #fdecec;
-    color: #b3261e;
-}
-
-.button-danger:hover {
-    background: #fbdede;
-}
+/* ---------- Deck list ---------- */
 
 .deck-list {
-    max-width: 480px;
+    max-width: 520px;
     margin: 60px auto;
     padding: 0 20px;
 }
 
 .deck-row {
     display: flex;
-    gap: 12px;
     align-items: center;
+    gap: 12px;
     margin-bottom: 16px;
 }
 
-.deck-item {
-    flex: 1;
-    padding: 16px 20px;
+.deck-card {
     background: white;
-    border-radius: 14px;
-    border: 1px solid #e3e3e3;
+    border-radius: 16px;
+    border: 1px solid #e4e4e4;
+    padding: 16px 18px;
+    margin-bottom: 16px;
 
-    font-size: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.deck-main {
+    appearance: none;
+    border: none;
+    background: transparent;
+
     text-align: left;
+    font-size: 1.2rem;
+    font-weight: 600;
+
+    padding: 6px 0;
     cursor: pointer;
-
-    transition:
-        background 0.15s ease,
-        transform 0.15s ease,
-        box-shadow 0.15s ease;
 }
 
-.deck-item:hover {
-    background: #fafafa;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.07);
-}
 
+/* Export button column */
 .deck-actions {
     display: flex;
-    gap: 8px;
 }
+
+.deck-actions .button {
+    padding: 14px 20px;
+    min-width: 96px;
+}
+
+.create-deck {
+    margin-top: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.deck-input {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    font-size: 1.1rem;
+}
+
+/* ---------- Bottom actions ---------- */
 
 .deck-global-actions {
     display: flex;
@@ -147,6 +155,24 @@ h2 {
 }
 
 .deck-global-actions .button {
+    flex: 1;
+}
+
+/* Card list page */
+
+.card-list-page {
+    max-width: 720px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.card-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 36px;
+}
+
+.card-actions .button {
     flex: 1;
 }
 
@@ -179,11 +205,138 @@ h2 {
         background 0.15s ease;
 }
 
-.card-preview:hover {
-    transform: translateY(-2px);
-    background: #fafafa;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+.card-preview {
+    padding: 20px 22px;
+    border-radius: 14px;
+    background: #ffffff;
+    border: 1px solid #e4e4e4;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        background 0.15s ease;
 }
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    padding-bottom: 10px;
+}
+
+.card-open-button {
+    border: none;
+    border-radius: 999px;
+    padding: 10px 16px;
+
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    background: #4177f6;
+    color: white;
+
+    cursor: pointer;
+
+    box-shadow: 0 4px 10px rgba(65,119,246,0.25);
+
+    transition:
+        background 0.15s ease,
+        transform 0.12s ease,
+        box-shadow 0.12s ease;
+}
+
+.show-answer-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.show-answer-container .button {
+    min-width: 220px;
+    font-size: 1.05rem;
+}
+
+
+.card-open-button:hover {
+    background: #2f63db;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(65,119,246,0.3);
+}
+
+.cardlist-buttons {
+    display: flex;
+    gap: 16px;
+    margin-top: 32px;
+}
+
+.back-button {
+    flex: 1;
+    border-radius: 999px;
+    padding: 14px 18px;
+
+    background: #e5e7eb;
+    color: #111;
+
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.back-button:hover {
+    background: #d9dce1;
+}
+
+.add-card-button {
+    flex: 1;
+    border-radius: 999px;
+    padding: 14px 18px;
+
+    background: #4177f6;
+    color: white;
+
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+
+    box-shadow: 0 6px 14px rgba(65,119,246,0.25);
+}
+
+.add-card-button:hover {
+    background: #2f63db;
+}
+
+.card-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.card-progress {
+    height: 4px;
+    background: #eef0f3;
+    border-radius: 999px;
+    overflow: hidden;
+    max-width: 220px;
+}
+
+.card-progress-bar {
+    height: 100%;
+    background: #4177f6;
+    border-radius: 999px;
+    transition: width 0.3s ease;
+}
+
+
+
+/* CARD VIEW */
 
 .card-view {
     max-width: 640px;
@@ -202,7 +355,7 @@ h2 {
 .card-surface {
     width: 100%;
     background: white;
-    padding: 28px;
+    padding: 15px;
     border-radius: 16px;
     border: 1px solid #e4e4e4;
     box-shadow: 0 4px 14px rgba(0,0,0,0.06);
@@ -217,7 +370,7 @@ h2 {
 .answer-surface {
     width: 100%;
     background: #fafafa;
-    padding: 24px;
+    padding: 15px;
     border-radius: 14px;
     border-left: 4px solid #4177f6;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
@@ -227,20 +380,82 @@ h2 {
     gap: 16px;
 }
 
+.button-primary {
+    background: #4177f6;
+    color: white;
+    box-shadow: 0 6px 14px rgba(65,119,246,0.25);
+}
 
+.button-primary:hover {
+    background: #2f63db;
+    transform: translateY(-1px);
+}
+
+.button-secondary {
+    background: #f3f4f6;
+    color: #333;
+}
+
+.button-secondary:hover {
+    background: #e7e8eb;
+}
+
+.button-danger {
+    background: #fdecec;
+    color: #b3261e;
+}
+
+.button-danger:hover {
+    background: #fbdede;
+}
+
+.delete-card {
+    max-width: 420px;
+    margin: 80px auto;
+    padding: 24px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    text-align: center;
+}
+
+.delete-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.delete-actions .button {
+    flex: 1;
+}
+
+
+/* EDITOR */
 .block-text,
 .block-math {
     font-size: 1.2rem;
     white-space: pre-line;
 }
 
+/* Math block container */
 .block-math {
+    width: 100%;
+    padding: 8px 0;
+
+    display: block;
     text-align: center;
-    padding: 8px 4px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    -webkit-overflow-scrolling: touch;
 }
 
+/* MathJax output itself */
 .block-math mjx-container {
-    max-width: 100%;
+    max-width: 100% !important;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 
@@ -256,30 +471,58 @@ h2 {
 
 
 .card-editor-page {
-    max-width: 700px;
+    max-width: 760px;
     margin: 40px auto;
     padding: 0 20px;
 }
 
-.field {
+.card-field {
     display: flex;
     flex-direction: column;
-    margin-bottom: 20px;
+    gap: 6px;
+    margin-bottom: 28px;
 }
 
-.field label {
+.card-field label {
     font-weight: 600;
-    margin-bottom: 6px;
 }
 
-.field input,
-.block-editor input,
-.block-editor textarea {
-    padding: 12px;
+.card-field input {
+    padding: 12px 14px;
     border-radius: 10px;
     border: 1px solid #ccc;
     font-size: 1rem;
 }
+
+.card-editor-page h2 {
+    margin-top: 36px;
+    margin-bottom: 16px;
+    font-size: 1.4rem;
+}
+
+.block-editor {
+    background: #ffffff;
+    padding: 18px;
+    border-radius: 14px;
+    border: 1px solid #e4e4e4;
+    margin-bottom: 18px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+
+.field input,
+.block-editor textarea,
+.block-editor input {
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    resize: vertical;
+}
+
 
 
 .block-editor {
@@ -292,23 +535,30 @@ h2 {
 
 .save-button {
     width: 100%;
+    margin-top: 32px;
+    font-size: 1.05rem;
 }
 
-.create-deck {
-    margin-top: 20px;
-    padding: 20px;
-    background: white;
-    border-radius: 14px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
 
+
+.block-editor button {
+    align-self: flex-start;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: none;
+    background: #fdecec;
+    color: #b3261e;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.block-editor button:hover {
+    background: #fbdede;
+}
+
+.add-block-buttons {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: 12px;
-}
-
-.deck-input {
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    font-size: 1.1rem;
+    margin: 12px 0 28px;
 }

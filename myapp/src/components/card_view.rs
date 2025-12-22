@@ -30,7 +30,7 @@ pub fn DeleteCard(card_id: i64, on_done: EventHandler<()>) -> Element {
             div { class: "delete-actions",
 
                 button {
-                    class: "button",
+                    class: "button button-danger",
                     onclick: move |_| {
                         spawn(async move {
                             let _ = delete_card(card_id).await;
@@ -41,7 +41,7 @@ pub fn DeleteCard(card_id: i64, on_done: EventHandler<()>) -> Element {
                 }
 
                 button {
-                    class: "button",
+                    class: "button button-secondary",
                     onclick: move |_| {
                         on_done.call(());
                     },
@@ -84,13 +84,16 @@ pub fn CardView(id: i64) -> Element {
                 }
             }
 
-            if !*show_answer.read() {
+        if !*show_answer.read() {
+            div { class: "show-answer-container",
                 button {
                     class: "button button-primary",
                     onclick: move |_| show_answer.set(true),
                     "Show answer"
                 }
             }
+        }
+
 
             if *show_answer.read() {
                 div { class: "answer-surface",

@@ -35,7 +35,16 @@ pub fn CardListPage(id: i64) -> Element {
                 for (card_id, card_name) in card_views {
                     div { key: "{card_id}", class: "card-preview",
 
-                        h2 { class: "card-title", "{card_name}" }
+    div { class: "card-main",
+        h2 { class: "card-title", "{card_name}" }
+
+        div { class: "card-progress",
+            div {
+                class: "card-progress-bar",
+                style: "width: 40%;"
+            }
+        }
+    }
 
                         button {
                             class: "card-open-button",
