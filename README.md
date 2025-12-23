@@ -19,3 +19,6 @@ rm -rf MathJax-3.2.2 mathjax.zip
 - [ ] Styling
 - [ ] Implement the deck export via the plugin and not in backend code
 - [ ] Score function und progress bar
+- [ ] Export funktion anpassen so dass Files und bilder auch exportiert werden
+- [ ] Logo und Titel ändern
+- [ ] Alle Debug statements entfernen
