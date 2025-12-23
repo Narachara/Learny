@@ -14,9 +14,7 @@ rm -rf MathJax-3.2.2 mathjax.zip
 ```
 
 ## TODO:
-- [ ] deletetion of decks, with warning dialog
 - [ ] Block reordering implementieren
-- [ ] Styling
 - [ ] Implement the deck export via the plugin and not in backend code
 - [ ] Score function und progress bar
 - [ ] Export funktion anpassen so dass Files und bilder auch exportiert werden
