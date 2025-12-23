@@ -19,8 +19,9 @@ use crate::db::{
     get_deck,
     download_file,
     delete_card,
-
+    delete_deck,
 };
+
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -95,6 +96,7 @@ pub fn run() {
                 delete_card,
                 export_deck,
                 import_deck,
+                delete_deck,
             ]
         )
         .run(tauri::generate_context!())

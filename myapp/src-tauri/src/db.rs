@@ -347,6 +347,47 @@ fn delete_file_from_app_data(
 }
 
 #[tauri::command]
+pub async fn delete_deck(
+    app: tauri::AppHandle,
+    deck_id: i64,
+) -> Result<(), String> {
+    let conn = open_db(&app)?;
+
+    conn.execute("PRAGMA foreign_keys = ON;", [])
+        .map_err(|e| e.to_string())?;
+
+    // 1. Fetch all card ids in this deck
+    let mut stmt = conn
+        .prepare("SELECT id FROM card WHERE deck_id = ?1")
+        .map_err(|e| e.to_string())?;
+
+    let card_ids: Vec<i64> = stmt
+        .query_map([deck_id], |row| row.get(0))
+        .map_err(|e| e.to_string())?
+        .filter_map(Result::ok)
+        .collect();
+
+    // 2. Delete cards one-by-one (this deletes files!)
+    for card_id in card_ids {
+        delete_card(app.clone(), card_id)?;
+    }
+
+    // 3. Delete the deck itself
+    let affected = conn.execute(
+        "DELETE FROM deck WHERE id = ?1",
+        [deck_id],
+    )
+    .map_err(|e| e.to_string())?;
+
+    if affected == 0 {
+        return Err(format!("No deck found with id {}", deck_id));
+    }
+
+    Ok(())
+}
+
+
+#[tauri::command]
 pub fn delete_card(app: tauri::AppHandle, id: i64) -> Result<(), String> {
     let conn = open_db(&app)?;
 

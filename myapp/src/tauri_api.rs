@@ -219,3 +219,19 @@ pub async fn get_cards(deck_id: i64) -> Vec<Card> {
         GetCardsArgs {deck_id}
     ).await
 }
+
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DeleteDeckArgs {
+    deck_id: i64,
+}
+
+
+pub async fn delete_deck(deck_id: i64) {
+    let _: () = tauri( 
+        "delete_deck",
+        DeleteDeckArgs {deck_id}
+    ).await;
+}
+
