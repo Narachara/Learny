@@ -235,3 +235,18 @@ pub async fn delete_deck(deck_id: i64) {
     ).await;
 }
 
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct UpdateCardScoreArgs {
+    card_id: i64,
+    correct: bool,
+}
+
+
+pub async fn update_score(card_id: i64, correct: bool) -> Card {
+    tauri(
+        "update_score",
+        UpdateCardScoreArgs {card_id, correct}
+    ).await
+}

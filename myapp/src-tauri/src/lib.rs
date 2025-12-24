@@ -20,6 +20,7 @@ use crate::db::{
     download_file,
     delete_card,
     delete_deck,
+    update_score,
 };
 
 
@@ -97,6 +98,7 @@ pub fn run() {
                 export_deck,
                 import_deck,
                 delete_deck,
+                update_score,
             ]
         )
         .run(tauri::generate_context!())

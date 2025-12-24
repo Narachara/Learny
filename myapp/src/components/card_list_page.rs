@@ -1,9 +1,8 @@
 use dioxus::prelude::*;
 use dioxus_router::prelude::*;
-use shared::models::{Deck, Block, Card};
+use shared::models::{ Deck, Block, Card };
 use crate::app::Route;
-use crate::tauri_api::{get_cards};
-
+use crate::tauri_api::{ get_cards };
 
 #[component]
 pub fn CardListPage(id: i64) -> Element {
@@ -17,13 +16,11 @@ pub fn CardListPage(id: i64) -> Element {
         });
     });
 
-    let card_views: Vec<(i64, String)> = cards
+    let card_views: Vec<(i64, String, u8)> = cards
         .read()
         .iter()
-        .map(|c| (c.id, c.name.clone()))
+        .map(|c| (c.id, c.name.clone(), c.progress_percent()))
         .collect();
-
-
 
     rsx! {
         div { class: "card-list-page",
@@ -32,19 +29,21 @@ pub fn CardListPage(id: i64) -> Element {
 
             div { class: "cards-container",
 
-                for (card_id, card_name) in card_views {
-                    div { key: "{card_id}", class: "card-preview",
+                for (card_id, card_name, progress) in card_views {
+                        div { key: "{card_id}", class: "card-preview",
 
-    div { class: "card-main",
-        h2 { class: "card-title", "{card_name}" }
+                        div { class: "card-main",
+                            h2 { class: "card-title", "{card_name}" }
 
-        div { class: "card-progress",
-            div {
-                class: "card-progress-bar",
-                style: "width: 40%;"
-            }
-        }
-    }
+                            // TODO :
+                            // get the progress from the card
+                            div { class: "card-progress",
+                                div {
+                                    class: "card-progress-bar",
+                                    style: "width: {progress}%;"
+                                }
+                            }
+                        }
 
                         button {
                             class: "card-open-button",

@@ -12,7 +12,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "myapp",
+        "title": "learny",
         "width": 800,
         "height": 600
       }

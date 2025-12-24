@@ -480,3 +480,30 @@ pub async fn download_file(
 
     Ok(())
 }
+
+
+#[tauri::command]
+pub async fn update_score(
+    app: tauri::AppHandle,
+    card_id: i64,
+    correct: bool,
+) -> Result<Card, String> {
+    let conn = open_db(&app)?;
+
+    let correct_inc = if correct { 1 } else { 0 };
+
+    conn.execute(
+        "
+        UPDATE card
+        SET
+            times_seen = times_seen + 1,
+            times_correct = times_correct + ?
+        WHERE id = ?;
+        ",
+        (correct_inc, card_id),
+    )
+    .map_err(|e| e.to_string())?;
+
+    // Return the updated card
+    get_card(app, card_id)
+}

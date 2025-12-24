@@ -4,21 +4,9 @@ use crate::components::block_view::render_block;
 use crate::components::card_list_page::CardListPage;
 use crate::components::{ CardEditorEdit };
 use crate::app::Route;
-use crate::tauri_api::{ get_card, delete_card };
+use crate::tauri_api::{ get_card, delete_card, update_score };
 
-fn card_score(times_known: u32, times_done: u32) -> f64 {
-    if times_done == 0 {
-        return f64::INFINITY;
-    }
 
-    let p = (times_known as f64) / (times_done as f64);
-
-    if p <= 0.0 {
-        return f64::INFINITY;
-    }
-
-    -p.ln()
-}
 
 #[component]
 pub fn DeleteCard(card_id: i64, on_done: EventHandler<()>) -> Element {
@@ -58,16 +46,16 @@ pub fn CardView(id: i64) -> Element {
     let mut deleting = use_signal(|| false);
     let nav = navigator();
 
-    let mut card = use_signal(|| Card::new_empty(id));
+    let mut card_signal = use_signal(|| Card::new_empty(id));
 
     use_effect(move || {
         spawn(async move {
             let loaded = get_card(id).await;
-            card.set(loaded);
+            card_signal.set(loaded);
         });
     });
 
-    let card = card.read();
+    let card = card_signal.read();
     let deck_id = card.deck_id;
 
     rsx! {
@@ -99,6 +87,40 @@ pub fn CardView(id: i64) -> Element {
                 div { class: "answer-surface",
                     for block in &card.back_blocks {
                         { render_block(block) }
+                    }
+                }
+
+                // Rating buttons
+                div { class: "card-rating",
+
+                    button {
+                        class: "button button-bad",
+                        onclick: move |_| {
+                            let mut card_signal = card_signal.clone();
+                            let mut show_answer = show_answer.clone();
+
+                            spawn(async move {
+                                let updated = update_score(id, false).await;
+                                card_signal.set(updated);
+                                show_answer.set(false);
+                            });
+                        },
+                        "BAD"
+                    }
+
+                    button {
+                        class: "button button-good",
+                        onclick: move |_| {
+                            let mut card_signal = card_signal.clone();
+                            let mut show_answer = show_answer.clone();
+
+                            spawn(async move {
+                                let updated = update_score(id, true).await;
+                                card_signal.set(updated);
+                                show_answer.set(false);
+                            });
+                        },
+                        "GOOD"
                     }
                 }
             }

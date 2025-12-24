@@ -12,6 +12,7 @@ body {
     padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* TODO: Des ding hier schneided die gleichungen auf desktop version ab */
 .safe-bottom {
     padding-bottom: calc(20px + env(safe-area-inset-bottom));
 }
@@ -380,6 +381,22 @@ h1 {
     gap: 16px;
 }
 
+
+.card-rating {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.button-good {
+    background: #2ecc71;
+}
+
+.button-bad {
+    background: #e74c3c;
+}
+
 .button-primary {
     background: #4177f6;
     color: white;
@@ -430,15 +447,16 @@ h1 {
 }
 
 
-/* EDITOR */
-.block-text,
-.block-math {
+
+.block-text {
     font-size: 1.2rem;
     white-space: pre-line;
 }
 
-/* Math block container */
 .block-math {
+    font-size: 1.2rem;
+    white-space: normal;
+
     width: 100%;
     padding: 8px 0;
 
@@ -446,16 +464,17 @@ h1 {
     text-align: center;
 
     overflow-x: auto;
-    overflow-y: hidden;
-
-    -webkit-overflow-scrolling: touch;
+    overflow-y: visible;
 }
 
-/* MathJax output itself */
 .block-math mjx-container {
-    max-width: 100% !important;
-    overflow-x: auto;
-    overflow-y: hidden;
+    display: block;
+    max-width: 100%;
+
+    line-height: normal !important;
+    padding: 0.2em 0;
+
+    overflow: visible !important;
 }
 
 

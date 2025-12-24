@@ -54,8 +54,25 @@ impl Card {
             tags: None,
         }
     }
-}
 
+    pub fn progress_percent(&self) -> u8 {
+        let good = self.times_correct as f64;
+        let bad = (self.times_seen - self.times_correct) as f64;
+
+        if good == 0.0 {
+            return 0;
+        }
+
+        let alpha = 2.0; // BAD penalty
+        let k = 0.6;     // curve speed
+
+        let score = (good - alpha * bad).max(0.0);
+
+        let confidence = 1.0 - (-k * score).exp();
+
+        (confidence * 100.0).round().clamp(0.0, 100.0) as u8
+    }
+}
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct Deck {
