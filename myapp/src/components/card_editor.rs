@@ -151,10 +151,6 @@ pub fn CardEditor(mode: EditorMode) -> Element {
                     spawn(async move {
                         // Call the plugin
                         let path = pick_image().await;
-                        web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
-                            "path returned from file picker is: {}",
-                            path
-                        )));
                         if path != "" {
                             // Insert a new Block::Image into the editor
                             front_blocks.write().push(Block::Image { src: path });
@@ -170,10 +166,6 @@ pub fn CardEditor(mode: EditorMode) -> Element {
                         spawn(async move {
                         // Call the plugin
                         let path = pick_archive().await;
-                        web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
-                            "path returned from file picker is: {}",
-                            path
-                        )));
                         if path != "" {
                             front_blocks.write().push(Block::File { path: path });
                         }
@@ -227,12 +219,7 @@ pub fn CardEditor(mode: EditorMode) -> Element {
                 class: "button button-secondary",
                 onclick: move |_| {
                     spawn(async move {
-                        // Call the plugin
                         let path = pick_image().await;
-                        web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
-                            "path returned from file picker is: {}",
-                            path
-                        )));
                         if path != "" {
                             // Insert a new Block::Image into the editor
                             back_blocks.write().push(Block::Image { src: path });

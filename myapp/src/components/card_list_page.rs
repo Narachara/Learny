@@ -35,8 +35,6 @@ pub fn CardListPage(id: i64) -> Element {
                         div { class: "card-main",
                             h2 { class: "card-title", "{card_name}" }
 
-                            // TODO :
-                            // get the progress from the card
                             div { class: "card-progress",
                                 div {
                                     class: "card-progress-bar",

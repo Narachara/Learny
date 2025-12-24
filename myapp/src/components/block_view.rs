@@ -27,14 +27,8 @@ fn appimg_url_from_virtual_path(virtual_path: &str) -> String {
     // this check doesnt work
     // Ich kann es sonst auch einfach beim kompilieren jeweils schnell ändern
     // dann kann ich es umstellen
-    let needs_http = cfg!(any(target_os = "windows", target_os = "android"));
-
-    if needs_http {
-        format!("http://appimg.localhost/{}", encoded)
-    } else {
-        // format!("http://appimg.localhost/{}", encoded)
-        format!("appimg://{}", encoded)
-    }
+     format!("http://appimg.localhost/{}", encoded)
+    // format!("appimg://{}", encoded)
 }
 
 pub fn render_block(block: &Block) -> Element {

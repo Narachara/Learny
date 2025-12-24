@@ -28,10 +28,6 @@ use crate::db::{
 pub fn run() {
     tauri::Builder::default()
     .register_uri_scheme_protocol("appimg", |_ctx, request| {
-        println!("🔥 APPIMG HANDLER HIT 🔥");
-        // FULL URI: appimg://localhost/Files/5755e5a2-91de-4077-b610-f531e8fdddc3.png
-        println!("FULL URI: {}", request.uri());
-
         let uri = request.uri();
 
         let raw_path = uri.path();
@@ -47,11 +43,6 @@ pub fn run() {
 
         let app_data_dir = _ctx.app_handle().path().app_data_dir().unwrap();
         let full_path = app_data_dir.join(&virtual_path);
-
-        println!("APP DATA DIR : {}", app_data_dir.display());
-        println!("VIRTUAL PATH : {}", virtual_path);
-        println!("FULL FS PATH : {}", full_path.display());
-        println!("EXISTS       : {}", full_path.exists());
 
         match std::fs::read(&full_path) {
             Ok(bytes) => {

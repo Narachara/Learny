@@ -15,7 +15,7 @@ rm -rf MathJax-3.2.2 mathjax.zip
 ## TODO:
 - [ ] Block reordering implementieren
 - [ ] Implement the deck export via the plugin and not in backend code
-- [ ] Score function und progress bar
+- [ ] Delete for blocks with files must delete the file when file gets replaced in edit mode
 - [ ] Export funktion anpassen so dass Files und bilder auch exportiert werden
-- [ ] Logo und Titel ändern
+- [ ] Logo ändern
 - [ ] Alle Debug statements entfernen

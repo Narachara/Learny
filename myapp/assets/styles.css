@@ -12,7 +12,6 @@ body {
     padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* TODO: Des ding hier schneided die gleichungen auf desktop version ab */
 .safe-bottom {
     padding-bottom: calc(20px + env(safe-area-inset-bottom));
 }
