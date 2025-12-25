@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use dioxus_router::prelude::*;
+// use dioxus_router::prelude::*;
 use shared::models::{ Deck, Block, Card };
 use crate::app::Route;
 use crate::tauri_api::{ get_cards };

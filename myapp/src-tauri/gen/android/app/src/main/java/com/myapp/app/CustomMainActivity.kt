@@ -1,4 +1,4 @@
-package com.myapp.app
+package com.learny.app
 
 import android.content.Intent
 import android.os.Bundle

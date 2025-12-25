@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use dioxus::document::{Script, Stylesheet};
-use dioxus_router::prelude::*;
+// use dioxus_router::prelude::*;
 use crate::components::{ DeckList, CardView, CardListPage, CardEditorEdit, CardEditorNew };
 use shared::models::*;
 
@@ -30,12 +30,12 @@ pub fn App() -> Element {
     rsx! {
         // Load MathJax config FIRST
         Script {
-            src: asset!("./assets/mathjax-config.js"),
+            src: asset!("/assets/mathjax-config.js"),
         },
 
         // Local MathJax core (NO CDN)
         Script {
-            src: asset!("./assets/mathjax/es5/tex-mml-chtml.js"),
+            src: asset!("/assets/mathjax/es5/tex-mml-chtml.js"),
         }
 /*         // Load MathJax core
         Script {
