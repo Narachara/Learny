@@ -19,3 +19,4 @@ rm -rf MathJax-3.2.2 mathjax.zip
 - [ ] Export funktion anpassen so dass Files und bilder auch exportiert werden
 - [ ] Logo ändern
 - [ ] Alle Debug statements entfernen
+- [ ] Test the new branch on android !!!
