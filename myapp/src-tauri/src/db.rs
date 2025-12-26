@@ -160,6 +160,45 @@ pub fn add_card(app: tauri::AppHandle, deck_id: i64, name: String) -> Result<i64
 }
 
 
+// for the import function
+pub fn restore_card_metadata(
+    app: &tauri::AppHandle,
+    card_id: i64,
+    created_at: i64,
+    times_seen: u32,
+    times_correct: u32,
+    tags: Option<String>,
+) -> Result<(), String> {
+    let conn = open_db(app)?;
+
+    // defensive fix: avoid underflow later
+    let seen = times_seen.max(times_correct);
+
+    conn.execute(
+        r#"
+        UPDATE card
+        SET
+            created_at = ?1,
+            times_seen = ?2,
+            times_correct = ?3,
+            tags = ?4
+        WHERE id = ?5
+        "#,
+        params![
+            created_at,
+            seen,
+            times_correct,
+            tags,
+            card_id
+        ],
+    )
+    .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+
+
 #[tauri::command]
 pub fn get_cards(app: tauri::AppHandle, deck_id: i64) -> Result<Vec<Card>, String> {
     let conn = open_db(&app)?;

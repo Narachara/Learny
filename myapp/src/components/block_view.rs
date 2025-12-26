@@ -28,8 +28,8 @@ fn appimg_url_from_virtual_path(virtual_path: &str) -> String {
     // this check doesnt work
     // Ich kann es sonst auch einfach beim kompilieren jeweils schnell ändern
     // dann kann ich es umstellen
-    //format!("http://appimg.localhost/{}", encoded) // for windows and android
-    format!("appimg://{}", encoded) // for mac and linux
+    format!("http://appimg.localhost/{}", encoded) // for windows and android
+    // format!("appimg://{}", encoded) // for mac and linux
 }
 
 pub fn render_block(block: &Block) -> Element {

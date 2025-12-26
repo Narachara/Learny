@@ -1,5 +1,5 @@
 use tauri_plugin_dialog::{ FileDialogBuilder, FilePath, DialogExt };
-use crate::db::{ open_db, add_deck, add_card , save_card_blocks };
+use crate::db::{ open_db, add_deck, add_card , save_card_blocks, restore_card_metadata };
 use futures::channel::oneshot;
 use tauri::Manager;
 use crate::export::DeckExport;
@@ -38,21 +38,29 @@ pub fn import_deck_export(
 
     // 2️⃣ Create cards
     for card in export.cards {
-        // Create empty card
         let new_card_id = add_card(
             app.clone(),
             new_deck_id,
             card.name.clone(),
         )?;
 
-        // Fill card blocks
         save_card_blocks(
             app.clone(),
             new_card_id,
             card.front_blocks,
             card.back_blocks,
         )?;
+
+        restore_card_metadata(
+            app,
+            new_card_id,
+            card.created_at,
+            card.times_seen,
+            card.times_correct,
+            card.tags,
+        )?;
     }
+
 
     Ok(new_deck_id)
 }
