@@ -81,3 +81,12 @@ pub struct Deck {
     pub created_at: i64,
     pub card_count: u32,
 }
+
+
+#[derive(Clone, Copy)]
+pub enum InsertBlockKind {
+    Text,
+    Math,
+    Image,
+    File,
+}
