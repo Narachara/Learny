@@ -320,6 +320,31 @@ pub fn update_card_name(app: tauri::AppHandle, id: i64, name: String) -> Result<
     Ok(())
 }
 
+#[tauri::command]
+pub async fn delete_block_from_app_data(
+    app: tauri::AppHandle,
+    virtual_path: String,
+) -> Result<(), String> {
+    let app_data_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| e.to_string())?;
+
+    let full_path = app_data_dir.join(&virtual_path);
+
+    if !full_path.exists() {
+        return Ok(());
+    }
+
+    println!("Deleting the file {:#?}", full_path);
+
+    std::fs::remove_file(&full_path)
+        .map_err(|e| format!("Failed to delete {:?}: {}", full_path, e))?;
+
+    Ok(())
+}
+
+
 // Delete operations
 
 fn delete_file_from_app_data(

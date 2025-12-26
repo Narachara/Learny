@@ -1,5 +1,6 @@
 use shared::models::*;
 use dioxus::prelude::*;
+use crate::tauri_api::delete_block_from_app_data;
 
 #[component]
 pub fn BlockEditor(
@@ -36,8 +37,6 @@ pub fn BlockEditor(
                         );
                     }
                 }
-                p { "Preview:" }
-                div { class: "block-math", dangerous_inner_html: "{value}" }
                 button {
                     onclick: move |_| on_remove.call(()),
                     "Remove"
@@ -47,21 +46,26 @@ pub fn BlockEditor(
 
         Block::Image { src } => rsx!(
             div { class: "block-editor image-editor",
-                input {
-                    value: "{src}",
-                    oninput: move |evt| {
-                        on_update.call(
-                            Block::Image { src: evt.value().to_string() }
-                        );
-                    }
-                }
-                img { class: "preview", src: "{src}" }
+                p {"Image saved"}
                 button {
-                    // TODO:
-                    // We must call the delete file fuction here because otherwise the files are still in the folder
-                    // I already have the delete function. I just need to expose it and call it here.
-                    // the src and path are virtual but the function should handle this
-                    onclick: move |_| on_remove.call(()),
+                    onclick: move |_| {
+                        let src = src.clone();
+                        let on_remove = on_remove.clone();
+
+                        spawn(async move {
+                            web_sys::console::log_1(
+                                &wasm_bindgen::JsValue::from_str("Deleting image file…")
+                            );
+
+                            delete_block_from_app_data(src).await;
+
+                            web_sys::console::log_1(
+                                &wasm_bindgen::JsValue::from_str("Delete finished")
+                            );
+
+                            on_remove.call(());
+                        });
+                    },
                     "Remove"
                 }
             }
@@ -71,11 +75,27 @@ pub fn BlockEditor(
             div { class: "block-editor file-editor",
                 p { "File Stored" }
                 button {
-                    // TODO:
-                    // We must call the delete file fuction here because otherwise the files are still in the folder
-                    onclick: move |_| on_remove.call(()),
+                    onclick: move |_| {
+                        let path = path.clone();
+                        let on_remove = on_remove.clone();
+
+                        spawn(async move {
+                            web_sys::console::log_1(
+                                &wasm_bindgen::JsValue::from_str("Deleting file…")
+                            );
+
+                            delete_block_from_app_data(path).await;
+
+                            web_sys::console::log_1(
+                                &wasm_bindgen::JsValue::from_str("Delete finished")
+                            );
+
+                            on_remove.call(());
+                        });
+                    },
                     "Remove"
                 }
+
             }
         ),
     }

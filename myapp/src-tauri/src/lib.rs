@@ -21,6 +21,7 @@ use crate::db::{
     delete_card,
     delete_deck,
     update_score,
+    delete_block_from_app_data,
 };
 
 
@@ -90,6 +91,7 @@ pub fn run() {
                 import_deck,
                 delete_deck,
                 update_score,
+                delete_block_from_app_data,
             ]
         )
         .run(tauri::generate_context!())

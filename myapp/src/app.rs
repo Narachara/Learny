@@ -37,7 +37,7 @@ pub fn App() -> Element {
         Script {
             src: asset!("/assets/mathjax/es5/tex-mml-chtml.js"),
         }
-/*         // Load MathJax core
+        /*  // Load MathJax core
         Script {
             src: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js",
         }, */

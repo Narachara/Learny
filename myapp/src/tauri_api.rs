@@ -250,3 +250,18 @@ pub async fn update_score(card_id: i64, correct: bool) -> Card {
         UpdateCardScoreArgs {card_id, correct}
     ).await
 }
+
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DeleteBlockArgs {
+    virtual_path: String,
+}
+
+pub async fn delete_block_from_app_data(virtual_path: String) {
+    let _: () = tauri(
+        "delete_block_from_app_data",
+        DeleteBlockArgs { virtual_path },
+    )
+    .await;
+}

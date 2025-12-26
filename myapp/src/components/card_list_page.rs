@@ -25,7 +25,8 @@ pub fn CardListPage(id: i64) -> Element {
     rsx! {
         div { class: "card-list-page",
 
-            h1 { "Cards in deck {id}" }
+            // TODO:
+            // Create a heading here by passing in the deck name and setting it as h1
 
             div { class: "cards-container",
 

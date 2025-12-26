@@ -142,9 +142,6 @@ pub fn DeckList() -> Element {
                     }
                 }
             }
-
-
-
         }
     }
 }
