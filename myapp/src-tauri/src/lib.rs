@@ -22,6 +22,7 @@ use crate::db::{
     delete_deck,
     update_score,
     delete_block_from_app_data,
+    rename_deck,
 };
 
 
@@ -92,6 +93,7 @@ pub fn run() {
                 delete_deck,
                 update_score,
                 delete_block_from_app_data,
+                rename_deck,
             ]
         )
         .run(tauri::generate_context!())

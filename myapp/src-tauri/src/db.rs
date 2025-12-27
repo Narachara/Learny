@@ -139,6 +139,27 @@ pub fn get_decks(app: tauri::AppHandle) -> Result<Vec<Deck>, String> {
 }
 
 
+#[tauri::command]
+pub fn rename_deck(
+    app: tauri::AppHandle,
+    name: String,
+    deck_id: i64,
+) -> Result<(), String> {
+    let conn = open_db(&app).map_err(|e| e.to_string())?;
+
+    conn.execute(
+        "UPDATE deck
+         SET name = ?1
+         WHERE id = ?2",
+        rusqlite::params![name, deck_id],
+    )
+    .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+
+
 
 // Create
 #[tauri::command]

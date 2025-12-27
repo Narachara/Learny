@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 use shared::models::*;
 use crate::app::Route;
 use crate::components::{ CreateDeck };
-use crate::tauri_api::{ init_db, get_decks, export_deck, import_deck, get_cards, delete_card, delete_deck };
+use crate::tauri_api::{ init_db, get_decks, export_deck, import_deck, get_cards, delete_card, delete_deck, rename_deck };
 
 
 #[component]
@@ -42,6 +42,8 @@ pub fn DeckList() -> Element {
     let mut creating = use_signal(|| false);
     let mut deleting: Signal<Option<i64>> = use_signal(|| None);
     let mut decks = use_signal(|| Vec::<Deck>::new());
+    let mut renaming: Signal<Option<i64>> = use_signal(|| None);
+    let mut rename_value = use_signal(String::new);
 
     use_future(move || async move {
         init_db().await;
@@ -91,6 +93,15 @@ pub fn DeckList() -> Element {
                                 onclick: move |_| deleting.set(Some(id)),
                                 "Delete Deck"
                             }
+
+                            button {
+                                class: "button",
+                                onclick: move |_| {
+                                    renaming.set(Some(id));
+                                    rename_value.set(name.clone());
+                                },
+                                "Rename"
+                            }
                         }
                         if deleting.read().as_ref() == Some(&id) {
                             DeleteDeck {
@@ -105,6 +116,55 @@ pub fn DeckList() -> Element {
                             }
                         }
                     }
+
+                    if renaming.read().as_ref() == Some(&id) {
+                        div { class: "rename-deck",
+
+                            input {
+                                class: "rename_input",
+                                value: "{rename_value}",
+                                autofocus: true,
+                                oninput: move |e| rename_value.set(e.value()),
+                                onkeydown: move |e| {
+                                    if e.key() == Key::Enter {
+                                        let new_name = rename_value.read().clone();
+                                        renaming.set(None);
+
+                                        spawn(async move {
+                                            let _ = rename_deck(new_name, id).await;
+                                            let loaded = get_decks().await;
+                                            decks.set(loaded);
+                                        });
+                                    }
+                                }
+                            }
+
+                            div { class: "rename-actions",
+
+                                button {
+                                    class: "button button-primary",
+                                    onclick: move |_| {
+                                        let new_name = rename_value.read().clone();
+                                        renaming.set(None);
+
+                                        spawn(async move {
+                                            let _ = rename_deck(new_name, id).await;
+                                            let loaded = get_decks().await;
+                                            decks.set(loaded);
+                                        });
+                                    },
+                                    "Save"
+                                }
+
+                                button {
+                                    class: "button button-secondary",
+                                    onclick: move |_| renaming.set(None),
+                                    "Cancel"
+                                }
+                            }
+                        }
+                    }
+
                 }
 
                 div { class: "deck-global-actions",

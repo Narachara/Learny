@@ -13,7 +13,6 @@ extern "C" {
         js_name = invoke
     )]
     async fn invoke_raw(cmd: &str, args: JsValue) -> JsValue;
-
 }
 
 
@@ -108,6 +107,18 @@ pub async fn import_deck() -> i64 {
     tauri("import_deck", ()).await
 }
 
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct RenameDeckArgs {
+    name: String,
+    deck_id: i64,
+}
+
+
+pub async fn rename_deck(name: String, deck_id: i64) {
+    let _: () = tauri("rename_deck", RenameDeckArgs {name, deck_id}).await;
+}
 
 //
 // ─────────────────────────────────────────────
