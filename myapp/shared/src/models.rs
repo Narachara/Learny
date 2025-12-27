@@ -19,6 +19,22 @@ impl Block {
             Block::File { .. } => "file",
         }
     }
+
+    pub fn file_path(&self) -> Option<&str> {
+        match self {
+            Block::Image { src } => Some(src),
+            Block::File { path } => Some(path),
+            _ => None,
+        }
+    }
+
+    pub fn file_path_mut(&mut self) -> Option<&mut String> {
+        match self {
+            Block::Image { src } => Some(src),
+            Block::File { path } => Some(path),
+            _ => None,
+        }
+    }
 }
 
 
@@ -72,6 +88,14 @@ impl Card {
 
         (confidence * 100.0).round().clamp(0.0, 100.0) as u8
     }
+
+    pub fn all_blocks(&self) -> impl Iterator<Item = &Block> {
+        self.front_blocks.iter().chain(self.back_blocks.iter())
+    }
+
+    pub fn all_blocks_mut(&mut self) -> impl Iterator<Item = &mut Block> {
+        self.front_blocks.iter_mut().chain(self.back_blocks.iter_mut())
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
@@ -81,6 +105,34 @@ pub struct Deck {
     pub created_at: i64,
     pub card_count: u32,
 }
+
+
+pub struct ExportPath {
+    pub zip_path: String,
+    pub extension: String,
+}
+
+
+pub fn derive_export_path(
+    card_index: usize,
+    block_index: usize,
+    side: &str,
+    original_path: &str,
+) -> String {
+    let ext = original_path
+        .rsplit('.')
+        .next()
+        .unwrap_or("bin");
+
+    format!(
+        "files/card_{}/{}_{}.{}",
+        card_index,
+        side,
+        block_index,
+        ext
+    )
+}
+
 
 
 #[derive(Clone, Copy)]

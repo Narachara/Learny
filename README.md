@@ -14,10 +14,7 @@ rm -rf MathJax-3.2.2 mathjax.zip
 ```
 
 ## TODO:
-- [ ] Rename Deck function und Deck options besser stylen
 - [ ] Implement the deck export via the plugin and not in backend code
-- [ ] Export funktion anpassen so dass Files und bilder auch exportiert werden
 - [ ] Logo ändern
-- [ ] Test on Android. Why no images are shown ? 
-- [ ] Update versions and move back to main branch
+- [ ] Search function. Able to search text blocks. 
 - [ ] Alle Debug statements entfernen

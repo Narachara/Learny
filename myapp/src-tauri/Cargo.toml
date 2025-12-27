@@ -31,3 +31,5 @@ urlencoding = "2.1"
 tauri-plugin-dialog = "^2.0.0"
 oneshot = "0.1"
 futures = "*"
+zip = "7.0.0"
+uuid = { version ="1.19.0", features = ["v4"] }
