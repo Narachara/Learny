@@ -449,7 +449,8 @@ h1 {
 
 .block-text {
     font-size: 1.2rem;
-    white-space: pre-line;
+    white-space: pre-wrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 .block-math {
