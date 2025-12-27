@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use shared::models::{ Card, Block, Deck };
+use shared::models::{ Card, Block, Deck, InsertBlockKind };
 use crate::components::BlockEditor;
 use crate::app::Route;
 use crate::tauri_api::{
@@ -10,6 +10,22 @@ use crate::tauri_api::{
     pick_image,
     pick_archive,
 };
+
+async fn create_block(kind: InsertBlockKind) -> Option<Block> {
+    match kind {
+        InsertBlockKind::Text => Some(Block::Text { value: "".into() }),
+        InsertBlockKind::Math => Some(Block::Math { value: "".into() }),
+        InsertBlockKind::Image => {
+            let path = pick_image().await;
+            (!path.is_empty()).then(|| Block::Image { src: path })
+        }
+        InsertBlockKind::File => {
+            let path = pick_archive().await;
+            (!path.is_empty()).then(|| Block::File { path })
+        }
+    }
+}
+
 
 #[derive(Clone, PartialEq, Copy)]
 pub enum EditorMode {
@@ -112,19 +128,52 @@ pub fn CardEditor(mode: EditorMode) -> Element {
             // FRONT BLOCKS
             //
             h2 { "Front Blocks" }
+
             for (i, block) in front_blocks.read().iter().cloned().enumerate() {
                 BlockEditor {
                     block,
-                    on_update: move |new_block| {
-                        let mut blocks = front_blocks.write();
-                        blocks[i] = new_block;
+
+                    on_update: {
+                        let mut front_blocks = front_blocks.clone();
+                        move |new_block| {
+                            front_blocks.write()[i] = new_block;
+                        }
                     },
-                    on_remove: move |_| {
-                        let mut blocks = front_blocks.write();
-                        blocks.remove(i);
-                    }
+
+                    on_remove: {
+                        let mut front_blocks = front_blocks.clone();
+                        move |_| {
+                            front_blocks.write().remove(i);
+                        }
+                    },
+
+                    on_insert_above: {
+                        let mut front_blocks = front_blocks.clone();
+                        move |kind| {
+                            let mut front_blocks = front_blocks.clone();
+                            spawn(async move {
+                                if let Some(block) = create_block(kind).await {
+                                    front_blocks.write().insert(i, block);
+                                }
+                            });
+                        }
+                    },
+
+                    on_insert_below: {
+                        let front_blocks = front_blocks.clone();
+                        move |kind| {
+                            let mut front_blocks = front_blocks.clone();
+                            spawn(async move {
+                                if let Some(block) = create_block(kind).await {
+                                    front_blocks.write().insert(i + 1, block);
+                                }
+                            });
+                        }
+                    },
                 }
             }
+
+
 
             div { class: "add-block-buttons",
         
@@ -182,17 +231,48 @@ pub fn CardEditor(mode: EditorMode) -> Element {
             // BACK BLOCKS
             //
             h2 { "Back Blocks" }
+
             for (i, block) in back_blocks.read().iter().cloned().enumerate() {
                 BlockEditor {
                     block,
-                    on_update: move |new_block| {
-                        let mut blocks = back_blocks.write();
-                        blocks[i] = new_block;
+
+                    on_update: {
+                        let mut back_blocks = back_blocks.clone();
+                        move |new_block| {
+                            back_blocks.write()[i] = new_block;
+                        }
                     },
-                    on_remove: move |_| {
-                        let mut blocks = back_blocks.write();
-                        blocks.remove(i);
-                    }
+
+                    on_remove: {
+                        let mut back_blocks = back_blocks.clone();
+                        move |_| {
+                            back_blocks.write().remove(i);
+                        }
+                    },
+
+                    on_insert_above: {
+                        let mut back_blocks = back_blocks.clone();
+                        move |kind| {
+                            let mut back_blocks = back_blocks.clone();
+                            spawn(async move {
+                                if let Some(block) = create_block(kind).await {
+                                    back_blocks.write().insert(i, block);
+                                }
+                            });
+                        }
+                    },
+
+                    on_insert_below: {
+                        let back_blocks = back_blocks.clone();
+                        move |kind| {
+                            let mut back_blocks = back_blocks.clone();
+                            spawn(async move {
+                                if let Some(block) = create_block(kind).await {
+                                    back_blocks.write().insert(i + 1, block);
+                                }
+                            });
+                        }
+                    },
                 }
             }
 

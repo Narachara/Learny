@@ -1,12 +1,12 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "myapp",
+  "productName": "learny",
   "version": "0.1.0",
-  "identifier": "com.myapp.app",
+  "identifier": "com.learny.app",
   "build": {
     "beforeDevCommand": "dx build --platform web --release",
     "devUrl": null,
-    "frontendDist": "../target/dx/myapp-ui/release/web/public"
+    "frontendDist": "../target/dx/learny-ui/release/web/public"
   },
   "app": {
     "withGlobalTauri": true,

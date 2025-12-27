@@ -96,13 +96,9 @@ pub fn CardView(id: i64) -> Element {
                     button {
                         class: "button button-bad",
                         onclick: move |_| {
-                            let mut card_signal = card_signal.clone();
-                            let mut show_answer = show_answer.clone();
-
                             spawn(async move {
                                 let updated = update_score(id, false).await;
-                                card_signal.set(updated);
-                                show_answer.set(false);
+                                 nav.push(Route::CardListPage { id: deck_id });
                             });
                         },
                         "BAD"
@@ -111,13 +107,9 @@ pub fn CardView(id: i64) -> Element {
                     button {
                         class: "button button-good",
                         onclick: move |_| {
-                            let mut card_signal = card_signal.clone();
-                            let mut show_answer = show_answer.clone();
-
                             spawn(async move {
                                 let updated = update_score(id, true).await;
-                                card_signal.set(updated);
-                                show_answer.set(false);
+                                nav.push(Route::CardListPage { id: deck_id });
                             });
                         },
                         "GOOD"

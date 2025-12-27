@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use dioxus_router::prelude::*;
+// use dioxus_router::prelude::*;
 use shared::models::{ Deck, Block, Card };
 use crate::app::Route;
 use crate::tauri_api::{ get_cards };
@@ -25,7 +25,8 @@ pub fn CardListPage(id: i64) -> Element {
     rsx! {
         div { class: "card-list-page",
 
-            h1 { "Cards in deck {id}" }
+            // TODO:
+            // Create a heading here by passing in the deck name and setting it as h1
 
             div { class: "cards-container",
 

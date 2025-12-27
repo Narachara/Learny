@@ -1,4 +1,4 @@
-package com.myapp.app
+package com.learny.app
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge

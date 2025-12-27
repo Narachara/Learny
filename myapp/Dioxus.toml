@@ -1,11 +1,11 @@
 [application]
-name = "myapp-ui"
+name = "learny-ui"
 default_platform = "web"
-out_dir = "/target/dx/myapp-ui/release/web/public"
+out_dir = "/target/dx/learny-ui/release/web/public"
 asset_dir = "assets"
 
 [web.app]
-title = "Tauri + Dioxus App"
+title = "learny"
 
 [web.watcher]
 reload_html = true
