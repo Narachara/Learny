@@ -181,6 +181,7 @@ pub fn add_card(app: tauri::AppHandle, deck_id: i64, name: String) -> Result<i64
 }
 
 
+
 // for the import function
 pub fn restore_card_metadata(
     app: &tauri::AppHandle,
@@ -371,14 +372,26 @@ pub fn save_card_blocks(
 
 
 #[tauri::command]
-pub fn update_card_name(app: tauri::AppHandle, id: i64, name: String) -> Result<(), String> {
+pub fn update_card_metadata(
+    app: tauri::AppHandle,
+    id: i64,
+    name: String,
+    tags: Option<String>,
+) -> Result<(), String> {
     let conn = open_db(&app)?;
+
     conn.execute(
-        "UPDATE card SET name = ?1 WHERE id = ?2",
-        params![name, id]
-    ).map_err(|e| e.to_string())?;
+        "UPDATE card
+         SET name = ?1,
+             tags = ?2
+         WHERE id = ?3",
+        rusqlite::params![name, tags, id],
+    )
+    .map_err(|e| e.to_string())?;
+
     Ok(())
 }
+
 
 #[tauri::command]
 pub async fn delete_block_from_app_data(

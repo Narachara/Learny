@@ -16,10 +16,10 @@ pub fn CardListPage(id: i64) -> Element {
         });
     });
 
-    let card_views: Vec<(i64, String, u8)> = cards
+    let card_views: Vec<(i64, String, u8, Option<String>)> = cards
         .read()
         .iter()
-        .map(|c| (c.id, c.name.clone(), c.progress_percent()))
+        .map(|c| (c.id, c.name.clone(), c.progress_percent(), c.tags.clone(),))
         .collect();
 
     rsx! {
@@ -30,11 +30,19 @@ pub fn CardListPage(id: i64) -> Element {
 
             div { class: "cards-container",
 
-                for (card_id, card_name, progress) in card_views {
+                for (card_id, card_name, progress, tags) in card_views {
                         div { key: "{card_id}", class: "card-preview",
 
                         div { class: "card-main",
                             h2 { class: "card-title", "{card_name}" }
+                            
+                            if let Some(tags) = tags {
+                                div { class: "card-tags",
+                                    for tag in tags.split(',') {
+                                        span { class: "card-tag", "{tag}" }
+                                    }
+                                }
+                            }
 
                             div { class: "card-progress",
                                 div {

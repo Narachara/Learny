@@ -5,7 +5,7 @@ use crate::app::Route;
 use crate::tauri_api::{
     get_card,
     add_card,
-    update_card_name,
+    update_card_metadata,
     save_card_blocks,
     pick_image,
     pick_archive,
@@ -25,6 +25,22 @@ async fn create_block(kind: InsertBlockKind) -> Option<Block> {
         }
     }
 }
+
+
+fn normalize_tags(raw: &str) -> Option<String> {
+    let tags: Vec<String> = raw
+        .split(',')
+        .map(|t| t.trim().to_lowercase())
+        .filter(|t| !t.is_empty())
+        .collect();
+
+    if tags.is_empty() {
+        None
+    } else {
+        Some(tags.join(","))
+    }
+}
+
 
 
 #[derive(Clone, PartialEq, Copy)]
@@ -97,7 +113,7 @@ pub fn CardEditor(mode: EditorMode) -> Element {
     // Destructure card – now it’s guaranteed to be Some
     //
     let c = card.read().as_ref().unwrap().clone();
-
+    let mut card_tags = use_signal(|| c.tags.clone().unwrap_or_default());
     let mut card_name = use_signal(|| c.name.clone());
     let mut front_blocks = use_signal(|| c.front_blocks.clone());
     let mut back_blocks = use_signal(|| c.back_blocks.clone());
@@ -120,9 +136,20 @@ pub fn CardEditor(mode: EditorMode) -> Element {
                 label { "Card Name" }
                 input {
                     value: "{card_name}",
-                    oninput: move |evt| card_name.set(evt.value().to_string())
+                    oninput: move |evt| card_name.set(evt.value())
                 }
             }
+
+            // Card tags
+            div { class: "card-field",
+                label { "Tags (comma separated)" }
+                input {
+                    placeholder: "e.g. ml, knn, classification",
+                    value: "{card_tags}",
+                    oninput: move |evt| card_tags.set(evt.value())
+                }
+            }
+
 
             //
             // FRONT BLOCKS
@@ -334,31 +361,32 @@ pub fn CardEditor(mode: EditorMode) -> Element {
 
                 onclick: move |_| {
                     let name = card_name.read().clone();
+                    let tags = normalize_tags(&card_tags.read());
                     let front = front_blocks.read().clone();
                     let back = back_blocks.read().clone();
 
                     spawn(async move {
                         match mode {
                             EditorMode::New { deck_id } => {
-                                // 1. Create card in DB
-                                let id = add_card(deck_id, name).await;
+                                // 1️⃣ Create card
+                                let id = add_card(deck_id, name.clone()).await;
 
-                                // 2. Save blocks
-                                // because in api we call let js_args = serde_wasm_bindgen::to_value(&args).unwrap();
-                                // we can pass by reference. Serde clones it and passes it to backend by value
+                                // 2️⃣ Update metadata (name + tags)
+                                update_card_metadata(id, name, tags).await;
+
+                                // 3️⃣ Save blocks
                                 save_card_blocks(id, &front, &back).await;
                             }
 
                             EditorMode::Edit { card_id } => {
-                                // 1. Update the name (you need this backend function)
-                                update_card_name(card_id, name).await;
+                                // 1️⃣ Update metadata
+                                update_card_metadata(card_id, name, tags).await;
 
-                                // 2. Save updated blocks
+                                // 2️⃣ Save blocks
                                 save_card_blocks(card_id, &front, &back).await;
                             }
                         }
 
-                        // Navigate back
                         nav.push(Route::CardListPage { id: c.deck_id });
                     });
                 },
