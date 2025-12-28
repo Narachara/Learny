@@ -43884,7 +43884,7 @@ onclick: move |_| {
             }
             EditorMode::Edit { card_id } => {
                 // Update name (you’re missing this function)
-                update_card_name(card_id, card_name.read().clone()).await.unwrap();
+                update_card_metadata(card_id, card_name.read().clone()).await.unwrap();
                 // Re-save blocks
                 save_card_blocks(card_id, &front_blocks.read(), &back_blocks.read()).await.unwrap();
                 card_id
@@ -43897,7 +43897,7 @@ onclick: move |_| {
 You’ll need to expose two new Tauri commands:
 
 #[tauri::command]
-pub fn update_card_name(app: AppHandle, id: i64, name: String)
+pub fn update_card_metadata(app: AppHandle, id: i64, name: String)
 
 #[tauri::command]
 pub fn save_card_blocks(app: AppHandle, card_id: i64, front: Vec<Block>, back: Vec<Block>)
@@ -44129,7 +44129,7 @@ If mode == New:
     let id = add_card(deck_id, name)
     save_card_blocks(id, front, back)
 Else if mode == Edit:
-    update_card_name(...)
+    update_card_metadata(...)
     save_card_blocks(existing_id, front, back)
 Let’s implement it inside your Save button:
 
@@ -44153,7 +44153,7 @@ button {
 
                 EditorMode::Edit { card_id } => {
                     // 1. Update the name (you need this backend function)
-                    update_card_name(card_id, name).await.unwrap();
+                    update_card_metadata(card_id, name).await.unwrap();
 
                     // 2. Save updated blocks
                     save_card_blocks(card_id, &front, &back).await.unwrap();
@@ -44171,7 +44171,7 @@ button {
 You need one more backend command to update the card name when editing:
 
 #[tauri::command]
-pub fn update_card_name(app: AppHandle, id: i64, name: String) -> Result<(), String> {
+pub fn update_card_metadata(app: AppHandle, id: i64, name: String) -> Result<(), String> {
     let conn = open_db(&app)?;
     conn.execute(
         "UPDATE card SET name = ?1 WHERE id = ?2",
@@ -44181,8 +44181,8 @@ pub fn update_card_name(app: AppHandle, id: i64, name: String) -> Result<(), Str
 }
 And a frontend wrapper for it:
 
-pub async fn update_card_name(id: i64, name: String) -> Result<(), String> {
-    tauri_command("update_card_name", json!({ "id": id, "name": name })).await
+pub async fn update_card_metadata(id: i64, name: String) -> Result<(), String> {
+    tauri_command("update_card_metadata", json!({ "id": id, "name": name })).await
 }
 5. Final architecture — finally unified
 NEW CARD
@@ -44207,7 +44207,7 @@ User edits
 
 User clicks Save:
 
-update_card_name(id, name)
+update_card_metadata(id, name)
 
 save_card_blocks(id, front, back)
 
@@ -44220,13 +44220,13 @@ If you want, I can show you exactly how to structure the tauri_command() helper 
 Du:
 We need to create a struct for the args also in this function:
 
-pub async fn update_card_name(id: i64, name: String) -> Result<(), String> {
-    tauri_command("update_card_name", json!({ "id": id, "name": name })).await
+pub async fn update_card_metadata(id: i64, name: String) -> Result<(), String> {
+    tauri_command("update_card_metadata", json!({ "id": id, "name": name })).await
 }
 ChatGPT:
 You’re correct — in your current API style you’re consistently creating Args structs for each Tauri command call. Let’s keep that style so your frontend API is consistent, type-safe, and autocomplete-friendly.
 
-You want update_card_name to match what you did for the others.
+You want update_card_metadata to match what you did for the others.
 
 Let’s do it cleanly.
 
@@ -44234,7 +44234,7 @@ Backend (Tauri command)
 You've already got:
 
 #[tauri::command]
-pub fn update_card_name(app: AppHandle, id: i64, name: String) -> Result<(), String> {
+pub fn update_card_metadata(app: AppHandle, id: i64, name: String) -> Result<(), String> {
     let conn = open_db(&app)?;
     conn.execute(
         "UPDATE card SET name = ?1 WHERE id = ?2",
@@ -44255,9 +44255,9 @@ struct UpdateCardNameArgs {
 }
 Now your wrapper:
 
-pub async fn update_card_name(id: i64, name: String) -> Result<(), String> {
+pub async fn update_card_metadata(id: i64, name: String) -> Result<(), String> {
     tauri_command(
-        "update_card_name",
+        "update_card_metadata",
         UpdateCardNameArgs { id, name }
     ).await
 }
@@ -44271,15 +44271,15 @@ struct UpdateCardNameArgs {
     name: String,
 }
 
-pub async fn update_card_name(id: i64, name: String) -> Result<(), String> {
-    tauri_command("update_card_name", UpdateCardNameArgs { id, name }).await
+pub async fn update_card_metadata(id: i64, name: String) -> Result<(), String> {
+    tauri_command("update_card_metadata", UpdateCardNameArgs { id, name }).await
 }
 This matches the pattern of your other API functions.
 
 Bonus detail:
 If name is coming from a Signal<String> you can pass a clone normally:
 
-update_card_name(card_id, card_name.read().clone()).await?;
+update_card_metadata(card_id, card_name.read().clone()).await?;
 Now your entire flow for updating cards is consistent, typed, and straightforward. It also makes the system easier to evolve later (tags, scheduling stats, etc.).
 
 If you want, I can help you create a small unified api.rs module that bundles all card-related calls cleanly (create, update, blocks, delete).
@@ -44360,7 +44360,7 @@ If you want, I can prepare a full cards_api.rs that contains:
 
 add_card
 
-update_card_name
+update_card_metadata
 
 save_card_blocks
 
@@ -44500,7 +44500,7 @@ onclick: move |_| {
                 save_card_blocks(id, &front, &back).await.unwrap();
             }
             EditorMode::Edit { card_id } => {
-                update_card_name(card_id, name).await.unwrap();
+                update_card_metadata(card_id, name).await.unwrap();
                 save_card_blocks(card_id, &front, &back).await.unwrap();
             }
         }
@@ -44542,7 +44542,7 @@ use dioxus::prelude::*;
 use shared::models::*;
 use crate::components::BlockEditor;
 use crate::app::Route;
-use crate::tauri_api::{get_card, add_card ,update_card_name, save_card_blocks };
+use crate::tauri_api::{get_card, add_card ,update_card_metadata, save_card_blocks };
 
 #[derive(Clone, PartialEq, Copy)]
 pub enum EditorMode {
@@ -44713,7 +44713,7 @@ pub fn CardEditor(mode: EditorMode) -> Element {
 
                             EditorMode::Edit { card_id } => {
                                 // 1. Update the name (you need this backend function)
-                                update_card_name(card_id, name).await.unwrap();
+                                update_card_metadata(card_id, name).await.unwrap();
 
                                 // 2. Save updated blocks
                                 save_card_blocks(card_id, &front, &back).await.unwrap();
@@ -44837,9 +44837,9 @@ struct UpdateCardNameArgs {
     name: String,
 }
 
-pub async fn update_card_name(id: i64, name: String) -> Result<(), String> {
+pub async fn update_card_metadata(id: i64, name: String) -> Result<(), String> {
     tauri(
-        "update_card_name",
+        "update_card_metadata",
         UpdateCardNameArgs { id, name }
     ).await
 }
@@ -45105,7 +45105,7 @@ pub fn save_card_blocks(
 }
 
 #[tauri::command]
-pub fn update_card_name(app: AppHandle, id: i64, name: String) -> Result<(), String> {
+pub fn update_card_metadata(app: AppHandle, id: i64, name: String) -> Result<(), String> {
     let conn = open_db(&app)?;
     conn.execute(
         "UPDATE card SET name = ?1 WHERE id = ?2",
@@ -45329,9 +45329,9 @@ struct UpdateCardNameArgs {
     name: String,
 }
 
-pub async fn update_card_name(id: i64, name: String) -> Result<(), String> {
+pub async fn update_card_metadata(id: i64, name: String) -> Result<(), String> {
     tauri(
-        "update_card_name",
+        "update_card_metadata",
         UpdateCardNameArgs { id, name }
     ).await
 }
@@ -45362,7 +45362,7 @@ get_card
 
 save_card_blocks
 
-update_card_name
+update_card_metadata
 
 This removes the panic and aligns everything end-to-end.
 
@@ -45498,9 +45498,9 @@ struct UpdateCardNameArgs {
     name: String,
 }
 
-pub async fn update_card_name(id: i64, name: String) -> Result<(), String> {
+pub async fn update_card_metadata(id: i64, name: String) -> Result<(), String> {
     tauri(
-        "update_card_name",
+        "update_card_metadata",
         UpdateCardNameArgs { id, name }
     ).await
 }
@@ -45685,7 +45685,7 @@ Here are your backend commands:
 ✔ get_cards → Result<Vec<Card>, String>
 ✔ get_card → Result<Card, String>
 ❌ save_card_blocks → NOT A COMMAND
-✔ update_card_name → Result<(), String>
+✔ update_card_metadata → Result<(), String>
 
 Now look carefully at this line:
 
@@ -45806,7 +45806,7 @@ Let's check your backend commands again:
 ✔ add_card → Result<i64, String>
 ✔ get_cards → Result<Vec<Card>, String>
 ✔ get_card → Result<Card, String>
-✔ update_card_name → Result<(), String>
+✔ update_card_metadata → Result<(), String>
 ❓ save_card_blocks → NOT a command
 ✔ save_card_blocks_cmd (renamed to save_card_blocks) → Result<(), String>
 So far so good.
@@ -46170,7 +46170,7 @@ pub fn save_card_blocks(
 }
 
 #[tauri::command]
-pub fn update_card_name(app: AppHandle, id: i64, name: String) -> Result<(), String> {
+pub fn update_card_metadata(app: AppHandle, id: i64, name: String) -> Result<(), String> {
     let conn = open_db(&app)?;
     conn.execute(
         "UPDATE card SET name = ?1 WHERE id = ?2",
@@ -46683,7 +46683,7 @@ get_card
 
 get_cards
 
-update_card_name
+update_card_metadata
 
 save_card_blocks (or _cmd, depending on name)
 
@@ -46701,7 +46701,7 @@ Your final (correct) handler list should look more like:
     add_card,
     get_cards,
     get_card,
-    update_card_name,
+    update_card_metadata,
     save_card_blocks,   // or save_card_blocks_cmd
 ])
 Whatever commands exist must be listed.
@@ -46771,7 +46771,7 @@ error[E0277]: the trait bound &AppHandle: CommandArg<'_, tauri_runtime_wry::Wry<
  10 | |             add_deck,
  11 | |             get_decks,
 ...   |
- 14 | |             update_card_name
+ 14 | |             update_card_metadata
  15 | |             ])
     | |_____________- in this macro invocation
     |
@@ -47163,7 +47163,7 @@ pub fn save_card_blocks(
     add_card,
     get_cards,
     get_card,
-    update_card_name,
+    update_card_metadata,
     save_card_blocks,   // ← add this
 ])
 ✅ 2. Frontend Wrapper Function (Rust WASM)
@@ -47196,7 +47196,7 @@ EditorMode::New { deck_id } => {
 }
 
 EditorMode::Edit { card_id } => {
-    update_card_name(card_id, name).await.unwrap();
+    update_card_metadata(card_id, name).await.unwrap();
     save_card_blocks(card_id, &front, &back).await.unwrap();
 }
 All correct.
@@ -47428,7 +47428,7 @@ Your handler list in run() only includes these:
     add_card,
     get_cards,
     get_card,
-    update_card_name,
+    update_card_metadata,
     save_card_blocks,
 ])
 But you showed earlier this was missing the trailing comma after add_card:
@@ -47574,7 +47574,7 @@ Check your handler list:
     add_card,
     get_cards,
     get_card,
-    update_card_name,
+    update_card_metadata,
     save_card_blocks,
 ])
 Make SURE init_db is really in that list.
@@ -47746,7 +47746,7 @@ tauri::Builder::default()
         add_card,
         get_cards,
         get_card,
-        update_card_name,
+        update_card_metadata,
         save_card_blocks,
     ])
 Check these pitfalls right now:
@@ -47880,7 +47880,7 @@ and ensure this exact list appears:
     add_card,
     get_cards,
     get_card,
-    update_card_name,
+    update_card_metadata,
     save_card_blocks,
 ])
 Make absolutely sure:
@@ -47901,7 +47901,7 @@ Something like:
     add_card   // ← missing comma
     get_cards, // ← this becomes UNKNOWN
     get_card,  // ← UNKNOWN
-    update_card_name, // ← UNKNOWN
+    update_card_metadata, // ← UNKNOWN
     save_card_blocks  // ← UNKNOWN
 ])
 When Tauri sees this, only the first 4 commands work.
@@ -47967,7 +47967,7 @@ tauri::Builder::default()
         add_card,
         get_cards,
         get_card,
-        update_card_name,
+        update_card_metadata,
         save_card_blocks,
     ])
 Common mistakes causing your exact symptoms:
@@ -47990,7 +47990,7 @@ println!("Registered commands: {:?}", tauri::generate_handler![
     add_card,
     get_cards,
     get_card,
-    update_card_name,
+    update_card_metadata,
     save_card_blocks
 ]);
 If Rust refuses to compile because of this debug line, it means the handler list already had errors.
@@ -48027,7 +48027,7 @@ pub fn run() {
             get_decks,
             add_card,
             save_card_blocks,
-            update_card_name
+            update_card_metadata
             ])
         .run(tauri::generate_context!())
         .expect("error running app");
@@ -48047,7 +48047,7 @@ Your handler list:
     get_decks,
     add_card,
     save_card_blocks,
-    update_card_name
+    update_card_metadata
 ])
 Missing:
 get_cards
@@ -48058,8 +48058,8 @@ But that is NOT the reason init_db returns null.
 
 The real reason is this:
 
-⭐ You DID NOT INCLUDE A TRAILING COMMA after update_card_name:
-update_card_name
+⭐ You DID NOT INCLUDE A TRAILING COMMA after update_card_metadata:
+update_card_metadata
 ])
 This is extremely important in Tauri’s generate_handler! macro.
 
@@ -48084,7 +48084,7 @@ Add commas everywhere:
     get_decks,
     add_card,
     save_card_blocks,
-    update_card_name,   // <-- ADD THIS COMMA
+    update_card_metadata,   // <-- ADD THIS COMMA
 ])
 Now rebuild.
 
@@ -48093,7 +48093,7 @@ Let’s demonstrate what currently happens.
 
 The macro sees:
 
-update_card_name
+update_card_metadata
 ])
 Tauri’s macro parser interprets this as:
 
@@ -48133,10 +48133,10 @@ Your entire issue is caused by one missing comma:
 
 ❌
 
-update_card_name
+update_card_metadata
 ✔
 
-update_card_name,
+update_card_metadata,
 In Tauri macros, every item must end with a comma — even the last one.
 
 If you'd like, I’ll help you extract all your commands into a dedicated commands.rs file with a safe macro wrapper so you never get bitten by this again.
@@ -48254,7 +48254,7 @@ Then change the handler list:
     get_decks,
     add_card,
     save_card_blocks,
-    update_card_name,
+    update_card_metadata,
 ])
 Then update your frontend:
 
@@ -48576,7 +48576,7 @@ pub fn save_card_blocks_inner(
 
 
 #[tauri::command]
-pub fn update_card_name(app: AppHandle, id: i64, name: String) -> Result<(), String> {
+pub fn update_card_metadata(app: AppHandle, id: i64, name: String) -> Result<(), String> {
     let conn = open_db(&app)?;
     conn.execute(
         "UPDATE card SET name = ?1 WHERE id = ?2",
@@ -48734,9 +48734,9 @@ struct UpdateCardNameArgs {
     name: String,
 }
 
-pub async fn update_card_name(id: i64, name: String) -> Result<(), String> {
+pub async fn update_card_metadata(id: i64, name: String) -> Result<(), String> {
     tauri(
-        "update_card_name",
+        "update_card_metadata",
         UpdateCardNameArgs { id, name }
     ).await
 }
@@ -48797,7 +48797,7 @@ Your handler list:
     get_decks,
     add_card,
     save_card_blocks,
-    update_card_name
+    update_card_metadata
 ])
 Notice what you do not have:
 
@@ -48855,7 +48855,7 @@ use crate::db::{
     get_decks,
     add_card,
     save_card_blocks,
-    update_card_name,
+    update_card_metadata,
     get_card,
     get_cards,
 };
@@ -48869,7 +48869,7 @@ Now your handler list must be EXACTLY:
     get_cards,
     get_card,
     save_card_blocks,
-    update_card_name,
+    update_card_metadata,
 ])
 Yes — list ALL commands, in explicit order.
 
@@ -48914,7 +48914,7 @@ use crate::db::{
     get_card,
     get_cards,
     save_card_blocks,
-    update_card_name,
+    update_card_metadata,
 };
 2. Register EXACTLY those commands
 .invoke_handler(tauri::generate_handler![
@@ -48925,7 +48925,7 @@ use crate::db::{
     get_cards,
     get_card,
     save_card_blocks,
-    update_card_name,
+    update_card_metadata,
 ])
 3. Rebuild and run
 You will then see:
@@ -49048,7 +49048,7 @@ This lines up exactly with your logs.
     get_decks,
     add_card,
     save_card_blocks,
-    update_card_name
+    update_card_metadata
 ])
 This will also break registration because:
 
@@ -49072,7 +49072,7 @@ use crate::db::{
     get_cards,
     get_card,
     save_card_blocks,
-    update_card_name,
+    update_card_metadata,
 };
 
 tauri::Builder::default()
@@ -49084,7 +49084,7 @@ tauri::Builder::default()
         get_cards,
         get_card,
         save_card_blocks,
-        update_card_name,
+        update_card_metadata,
     ])
     .run(...)
 In db.rs
@@ -49768,7 +49768,7 @@ get_cards
 
 save_card_blocks
 
-update_card_name
+update_card_metadata
 
 Anywhere you used AppHandle, replace it with tauri::AppHandle without importing it.
 
@@ -50043,7 +50043,7 @@ You have:
     get_decks,
     add_card,
     save_card_blocks,
-    update_card_name,
+    update_card_metadata,
 ])
 BUT earlier you had a missing comma
 and Tauri macro parsing is fragile.
@@ -50063,7 +50063,7 @@ tauri::Builder::default()
         get_cards,
         get_card,
         save_card_blocks,
-        update_card_name,
+        update_card_metadata,
     ])
     .run(tauri::generate_context!())
     .expect("error running app");
@@ -50154,7 +50154,7 @@ use crate::db::{
     get_decks,
     add_card,
     save_card_blocks,
-    update_card_name,
+    update_card_metadata,
     get_card,
     get_cards,
 };
@@ -50172,7 +50172,7 @@ pub fn run() {
                 get_cards,
                 get_card,
                 save_card_blocks,
-                update_card_name,
+                update_card_metadata,
             ]
         )
         .run(tauri::generate_context!())
@@ -50233,7 +50233,7 @@ tauri::generate_handler![
     get_cards,
     get_card,
     save_card_blocks,
-    update_card_name,
+    update_card_metadata,
 ]
 🟥 Your Wrapper Works
 After reverting it, the wrapper correctly handles Tauri commands.
@@ -50308,7 +50308,7 @@ get_cards
 
 save_card_blocks
 
-update_card_name
+update_card_metadata
 
 Important:
 They must all take app: tauri::AppHandle
@@ -50418,7 +50418,7 @@ add_card(app: tauri::AppHandle, ...)
 get_card(app: tauri::AppHandle, ...)
 get_cards(app: tauri::AppHandle, ...)
 save_card_blocks(app: tauri::AppHandle, ...)
-update_card_name(app: tauri::AppHandle, ...)
+update_card_metadata(app: tauri::AppHandle, ...)
 🟥 WHY THIS FIX IS CRITICAL
 Tauri expands the #[tauri::command] macro using the full path:
 
@@ -50733,7 +50733,7 @@ pub fn save_card_blocks(
 
 
 #[tauri::command]
-pub fn update_card_name(app: tauri::AppHandle, id: i64, name: String) -> Result<(), String> {
+pub fn update_card_metadata(app: tauri::AppHandle, id: i64, name: String) -> Result<(), String> {
     let conn = open_db(&app)?;
     conn.execute(
         "UPDATE card SET name = ?1 WHERE id = ?2",
@@ -51632,13 +51632,13 @@ add_card,
 get_cards,
 get_card,
 save_card_blocks,
-update_card_name,
+update_card_metadata,
 Let's check the suspicious ones:
 add_card — returns Result<i64, String> → OK
 get_cards — returns Result<Vec<Card>, String> → OK
 get_card — returns Result<Card, String> → OK
 save_card_blocks — returns Result<(), String> → OK
-update_card_name — returns Result<(), String> → OK
+update_card_metadata — returns Result<(), String> → OK
 Everything looks correct.
 
 So what can still cause []?
@@ -52123,9 +52123,9 @@ struct UpdateCardNameArgs {
     name: String,
 }
 
-pub async fn update_card_name(id: i64, name: String) {
+pub async fn update_card_metadata(id: i64, name: String) {
     let _: () = call(
-        "update_card_name",
+        "update_card_metadata",
         UpdateCardNameArgs { id, name }
     ).await;
 }
@@ -52144,7 +52144,7 @@ This matches exactly how Android returns values.
 Your earlier version passed id instead of (deck_id, name).
 
 4. Ensured all commands return the correct type
-init_db, save_card_blocks, update_card_name → return ()
+init_db, save_card_blocks, update_card_metadata → return ()
 get_card → returns Card
 etc.
 
@@ -52283,17 +52283,17 @@ get_card
 
 save_card_blocks
 
-update_card_name
+update_card_metadata
 
 Each must accept a single struct for parameters.
 
 Like this:
 
 #[tauri::command]
-pub fn update_card_name(app: AppHandle, args: UpdateCardNameArgs) -> Result<(), String>
+pub fn update_card_metadata(app: AppHandle, args: UpdateCardNameArgs) -> Result<(), String>
 Not:
 
-pub fn update_card_name(app: AppHandle, id: i64, name: String)
+pub fn update_card_metadata(app: AppHandle, id: i64, name: String)
 ⭐ If you want
 I can rewrite your entire backend db.rs into the correct Tauri argument-struct pattern so the frontend works 100% with your new API wrapper.
 
@@ -52432,7 +52432,7 @@ But don't do this. It will bite you later.
 🔍 Why this matters: ALL commands must match this rule
 In your backend you have:
 
-pub fn update_card_name(app: AppHandle, id: i64, name: String)
+pub fn update_card_metadata(app: AppHandle, id: i64, name: String)
 pub fn save_card_blocks(app: AppHandle, card_id: i64, front: Vec<Block>, back: Vec<Block>)
 pub fn add_card(app: AppHandle, deck_id: i64, name: String)
 Every single one of these requires arrays from JavaScript.
@@ -53107,7 +53107,7 @@ get_card
 
 save_card_blocks
 
-update_card_name
+update_card_metadata
 
 get_cards
 
@@ -53163,7 +53163,7 @@ add_card()
 get_decks()
 get_card()
 save_card_blocks()
-update_card_name()
+update_card_metadata()
 Here place arrows down to:
 
 🟧 BACKEND COMMANDS
@@ -53175,7 +53175,7 @@ get_decks
 add_card
 get_card
 save_card_blocks
-update_card_name
+update_card_metadata
 get_cards
 open_db(app)
 And then draw the actual flow arrows:
@@ -53359,7 +53359,7 @@ Or paste into File → Import From → Device in diagrams.net.
         <mxCell id="call" value="call()" style="rounded=1;fillColor=#ffffff;strokeColor=#82b366;" vertex="1" parent="apiLayer">
           <mxGeometry x="20" y="160" width="260" height="40" as="geometry"/>
         </mxCell>
-        <mxCell id="apiFunctions" value="add_deck(), get_decks(), add_card(), save_card_blocks(), get_card(), update_card_name()" style="rounded=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=12;" vertex="1" parent="apiLayer">
+        <mxCell id="apiFunctions" value="add_deck(), get_decks(), add_card(), save_card_blocks(), get_card(), update_card_metadata()" style="rounded=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=12;" vertex="1" parent="apiLayer">
           <mxGeometry x="20" y="220" width="260" height="110" as="geometry"/>
         </mxCell>
 
@@ -58072,7 +58072,7 @@ pub fn run() {
                 get_cards,
                 get_card,
                 save_card_blocks,
-                update_card_name,
+                update_card_metadata,
                 commands::pick_image,
             ]
         )
@@ -58268,7 +58268,7 @@ src-tauri/src/lib.rs:
     get_cards,
     get_card,
     save_card_blocks,
-    update_card_name,
+    update_card_metadata,
 ])
 Notice something:
 
@@ -58514,7 +58514,7 @@ pub fn run() {
             get_cards,
             get_card,
             save_card_blocks,
-            update_card_name,
+            update_card_metadata,
         ])
         .run(tauri::generate_context!())
         .expect("error running app");
@@ -63896,7 +63896,7 @@ use crate::db::{
     get_decks,
     add_card,
     save_card_blocks,
-    update_card_name,
+    update_card_metadata,
     get_card,
     get_cards,
 };
@@ -63955,7 +63955,7 @@ pub fn run() {
                 get_cards,
                 get_card,
                 save_card_blocks,
-                update_card_name
+                update_card_metadata
             ]
         )
         .run(tauri::generate_context!())

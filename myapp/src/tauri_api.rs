@@ -197,24 +197,29 @@ pub async fn save_card_blocks(card_id: i64, front: &Vec<Block>, back: &Vec<Block
     ).await;
 }
 
-//
-// Update card name
-//
+
+
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-struct UpdateCardNameArgs {
+struct UpdateCardMetadataArgs {
     id: i64,
     name: String,
+    tags: Option<String>,
 }
 
-pub async fn update_card_name(id: i64, name: String) {
+
+pub async fn update_card_metadata(
+    id: i64,
+    name: String,
+    tags: Option<String>,
+) {
     let _: () = tauri(
-        "update_card_name",
-        UpdateCardNameArgs { id, name }
-    ).await;
+        "update_card_metadata",
+        UpdateCardMetadataArgs { id, name, tags },
+    )
+    .await;
 }
-
 
 
 #[derive(Serialize)]
