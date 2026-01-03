@@ -14969,7 +14969,7 @@ keytool -genkey -v \
 ### Step 2 — Sign the APK
 
 ```
-$ANDROID_HOME/build-tools/34.0.0/apksigner sign \
+$ANDROID_HOME/build-tools/36.1.0/apksigner sign \
   --ks my-release-key.jks \
   app-universal-release-unsigned.apk
 ```
