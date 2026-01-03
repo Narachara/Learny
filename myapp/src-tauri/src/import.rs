@@ -158,8 +158,8 @@ pub fn import_deck_export(
 #[tauri::command]
 pub async fn import_deck(app: tauri::AppHandle) -> Result<i64, String> {
     let Some(bytes) = app
-        .bliet()
-        .pick_import_file()
+        .bliet() // calling a plugin function via appstate 
+        .pick_import_file() // this function is from plugin
         .await
         .map_err(|e| e.to_string())?
     else {

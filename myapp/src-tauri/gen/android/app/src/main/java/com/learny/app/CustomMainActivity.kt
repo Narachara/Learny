@@ -15,8 +15,24 @@ open class CustomMainActivity : TauriActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        findPlugin<ExamplePlugin>("bliet")?.handleActivityResult(requestCode, resultCode, data)
+
+        try {
+            val field = pluginManager.javaClass.getDeclaredField("plugins")
+            field.isAccessible = true
+
+            val plugins = field.get(pluginManager) as? Map<*, *> ?: return
+
+            plugins.values.forEach { handle ->
+                val instance = (handle as? PluginHandle)?.instance
+                if (instance is ExamplePlugin) {
+                    instance.handleActivityResult(requestCode, resultCode, data)
+                }
+            }
+        } catch (_: Exception) {
+            // swallow – nothing else we can do
+        }
     }
+
 
     @Suppress("UNCHECKED_CAST")
     private fun <T> findPlugin(id: String): T? {

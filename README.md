@@ -14,7 +14,7 @@ rm -rf MathJax-3.2.2 mathjax.zip
 ```
 
 ## TODO:
-- [ ] Implement the deck export via the plugin and not in backend code
 - [ ] Logo ändern
 - [ ] Search function. Able to search text blocks. 
 - [ ] Alle Debug statements entfernen
+- [ ] Buttons in Decklist kleiner machen

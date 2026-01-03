@@ -6,6 +6,7 @@ use std::io::Write;
 use tauri::Manager;
 use tauri_plugin_dialog::{DialogExt, FileDialogBuilder, FilePath};
 use zip::{write::FileOptions, ZipWriter};
+use tauri_plugin_bliet::BlietExt;
 
 
 
@@ -222,24 +223,12 @@ pub async fn export_deck(
     .await
     .map_err(|e| e.to_string())??;
 
-    let (tx, rx) = oneshot::channel();
-
-    FileDialogBuilder::new(app.dialog().clone())
-        .set_file_name("deck-export.zip")
-        .save_file(move |file| {
-            let _ = tx.send(file);
-        });
-
-    let dest = match rx.await {
-        Ok(Some(FilePath::Path(path))) => path,
-        Ok(_) => return Ok(()), // user cancelled or non-path
-        Err(_) => return Ok(()), // dialog canceled
-    };
-
-    tauri::async_runtime::spawn_blocking(move || {
-        std::fs::write(dest, zip_bytes).map_err(|e| e.to_string())
-    })
-    .await.map_err(|e| e.to_string())??;
+    // 🔌 delegate saving to plugin
+    let export_result = app
+        .bliet()
+        .save_export_bytes(zip_bytes, "deck-export.zip")
+        .await
+        .map_err(|e| e.to_string())?;
 
     Ok(())
 }

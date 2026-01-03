@@ -1,5 +1,5 @@
 use serde::de::DeserializeOwned;
-use serde_json::json;
+use serde_json::{json, Value};
 use tauri::{ plugin::{ PluginApi, PluginHandle }, AppHandle, Runtime };
 use shared::FileResponse;
 use crate::models::*;
@@ -75,6 +75,25 @@ impl<R: Runtime> Bliet<R> {
 
         Ok(bytes)
     }
+
+    pub async fn save_export_bytes(
+        &self,
+        bytes: Vec<u8>,
+        suggested_name: &str,
+    ) -> crate::Result<()> {
+        let encoded = base64::encode(bytes);
+
+        let _resp: serde_json::Value = self.0.run_mobile_plugin(
+            "saveExportBytes",
+            serde_json::json!({
+                "data": encoded,
+                "fileName": suggested_name,
+            }),
+        )?;
+
+        Ok(())
+    }
+
 
 
 }

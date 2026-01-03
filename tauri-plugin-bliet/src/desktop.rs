@@ -126,4 +126,34 @@ impl<R: Runtime> Bliet<R> {
         let bytes = fs::read(path)?;
         Ok(Some(bytes))
     }
+
+    pub async fn save_export_bytes(
+        &self,
+        bytes: Vec<u8>,
+        suggested_name: &str,
+    ) -> crate::Result<()> {
+        let app = self.0.clone();
+
+        // ---- open save dialog ----
+        let (tx, rx) = oneshot::channel();
+
+        FileDialogBuilder::new(app.dialog().clone())
+            .set_file_name(suggested_name)
+            .save_file(move |file| {
+                let _ = tx.send(file);
+            });
+
+        let dest = match rx.await? {
+            Some(FilePath::Path(path)) => path,
+            _ => return Ok(()), // user cancelled or unsupported
+        };
+
+        // ---- blocking filesystem write ----
+        tauri::async_runtime::spawn_blocking(move || {
+            std::fs::write(dest, bytes)
+        })
+        .await??;
+
+        Ok(())
+    }
 }
