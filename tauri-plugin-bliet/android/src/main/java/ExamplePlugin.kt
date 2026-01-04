@@ -35,10 +35,12 @@ class ExamplePlugin(private val activity: Activity) : Plugin(activity) {
     fun pickImage(invoke: Invoke) {
         pendingInvoke = invoke
 
-        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-            type = "image/*"
-            addCategory(Intent.CATEGORY_OPENABLE)
-        }
+    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+        addCategory(Intent.CATEGORY_OPENABLE)
+        type = "image/*"
+        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+    }
 
         activity.startActivityForResult(intent, PICK_IMAGE_REQUEST_CODE)
     }
@@ -50,7 +52,7 @@ class ExamplePlugin(private val activity: Activity) : Plugin(activity) {
     fun pickArchive(invoke: Invoke) {
         pendingInvoke = invoke
 
-        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             type = "*/*"
             addCategory(Intent.CATEGORY_OPENABLE)
             putExtra(
@@ -63,6 +65,8 @@ class ExamplePlugin(private val activity: Activity) : Plugin(activity) {
                     "application/x-rar-compressed"
                 )
             )
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
         }
 
         activity.startActivityForResult(intent, PICK_ARCHIVE_REQUEST_CODE)
@@ -75,9 +79,11 @@ class ExamplePlugin(private val activity: Activity) : Plugin(activity) {
     fun pickImportFile(invoke: Invoke) {
         pendingInvoke = invoke
 
-        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             type = "*/*"
             addCategory(Intent.CATEGORY_OPENABLE)
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                    Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
         }
 
         activity.startActivityForResult(intent, PICK_IMPORT_REQUEST_CODE)
@@ -102,7 +108,13 @@ class ExamplePlugin(private val activity: Activity) : Plugin(activity) {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "application/zip"
             putExtra(Intent.EXTRA_TITLE, fileName)
+            flags = Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
+                    Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
         }
+
+
+
+
 
         pendingInvoke = invoke
         pendingExportData = bytes
@@ -114,64 +126,101 @@ class ExamplePlugin(private val activity: Activity) : Plugin(activity) {
     // ================================
     // Activity result handler
     // ================================
-    fun handleActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        // ---------- EXPORT ----------
-        if (requestCode == SAVE_EXPORT_REQUEST_CODE) {
-            val invoke = pendingInvoke
-            val bytes = pendingExportData
+fun handleActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
-            pendingInvoke = null
-            pendingExportData = null
+    // ---------- EXPORT ----------
+    if (requestCode == SAVE_EXPORT_REQUEST_CODE) {
+        val invoke = pendingInvoke
+        val bytes = pendingExportData
 
-            if (invoke == null) return
+        pendingInvoke = null
+        pendingExportData = null
 
-            if (resultCode != Activity.RESULT_OK || data?.data == null || bytes == null) {
-                invoke.resolve(null) // user cancelled → no-op
+        if (invoke == null) return
+
+        if (resultCode != Activity.RESULT_OK || data?.data == null || bytes == null) {
+            invoke.resolve(null)
+            return
+        }
+
+        try {
+            val uri = data.data!!
+            
+            activity.contentResolver.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
+            
+            val pfd = activity.contentResolver.openFileDescriptor(uri, "wt")
+                ?: throw IOException("Failed to open file descriptor")
+
+            FileOutputStream(pfd.fileDescriptor).use { out ->
+                out.write(bytes)
+                out.flush()
+            }
+            pfd.close()
+
+            invoke.resolve(null)
+        } catch (e: Exception) {
+            invoke.reject("Failed to save export file")
+        }
+        return
+    }
+
+    // ---------- IMAGE / ARCHIVE / IMPORT ----------
+    val invoke = pendingInvoke ?: return
+    pendingInvoke = null
+
+    if (resultCode != Activity.RESULT_OK || data?.data == null) {
+        val ret = JSObject()
+        when (requestCode) {
+            PICK_IMPORT_REQUEST_CODE -> ret.put("data", null)
+            else -> ret.put("path", null)
+        }
+        invoke.resolve(ret)
+        return
+    }
+
+    val uri = data.data!!
+
+    when (requestCode) {
+
+        // ---------- IMPORT (bytes) ----------
+        PICK_IMPORT_REQUEST_CODE -> {
+            try {
+                activity.contentResolver.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+                val bytes = activity.contentResolver
+                    .openInputStream(uri)
+                    ?.readBytes()
+
+                val encoded = Base64.encodeToString(bytes, Base64.NO_WRAP)
+                val ret = JSObject()
+                ret.put("data", encoded)
+                invoke.resolve(ret)
+            } catch (e: Exception) {
+                invoke.reject("Failed to read import file")
+            }
+        }
+
+        // ---------- IMAGE / ARCHIVE (path) ----------
+        PICK_IMAGE_REQUEST_CODE,
+        PICK_ARCHIVE_REQUEST_CODE -> {
+            val result = copyUriToFilesDir(uri)
+            if (result == null) {
+                invoke.reject("Failed to import file")
                 return
             }
 
-            try {
-                val uri = data.data!!
-
-                val pfd = activity.contentResolver.openFileDescriptor(uri, "wt")
-                    ?: throw IOException("Failed to open file descriptor")
-
-                FileOutputStream(pfd.fileDescriptor).use { out ->
-                    out.write(bytes)
-                    out.flush()
-                }
-                pfd.close()
-
-                invoke.resolve(null)
-            } catch (e: Exception) {
-                invoke.reject("Failed to save export file")
-            }
-
-            return
-        }
-
-        // ---------- EXISTING CODE BELOW ----------
-        val invoke = pendingInvoke ?: return
-        pendingInvoke = null
-
-        if (resultCode != Activity.RESULT_OK || data?.data == null) {
+            val (_, virtualPath) = result
             val ret = JSObject()
-            when (requestCode) {
-                PICK_IMPORT_REQUEST_CODE -> ret.put("data", null)
-                else -> ret.put("path", null)
-            }
+            ret.put("path", virtualPath)
             invoke.resolve(ret)
-            return
-        }
-
-        val uri = data.data!!
-
-        when (requestCode) {
-            PICK_IMPORT_REQUEST_CODE -> { /* unchanged */ }
-            PICK_IMAGE_REQUEST_CODE,
-            PICK_ARCHIVE_REQUEST_CODE -> { /* unchanged */ }
         }
     }
+}
 
 
     // ================================
